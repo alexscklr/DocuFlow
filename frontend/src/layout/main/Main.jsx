@@ -10,6 +10,7 @@ export default function Main() {
             <h1>Main Content</h1>
             <Button icon={viteLogo} label="Vite Logo" slug="/about" />
             <Button icon={reactLogo} label="React Logo" slug="/about" />
+            <Button icon={reactLogo} label="Go to Access Page" slug="/access" />
         </main>
     )
 }
