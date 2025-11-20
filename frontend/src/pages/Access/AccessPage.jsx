@@ -7,15 +7,14 @@ export const AccessPage = () => {
   const isLogin = accessType === 'login';
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 py-10">
+    <main className="h-screen flex items-center justify-center">
       <div className="w-full max-w-4xl space-y-6 text-center">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold">
+        <div className="flex flex-col items-center gap-10">
+          <h1 className="text-3xl font-semibold space-y-2">
             {isLogin ? 'Login Page' : 'Signup Page'}
           </h1>
-        </div>
 
-        <div className="flex flex-col items-center gap-6">
+
           {isLogin ? <LoginForm /> : <SignupForm />}
 
           <button

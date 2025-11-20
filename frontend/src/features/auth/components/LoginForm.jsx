@@ -24,23 +24,19 @@ export const LoginForm = () => {
   };
 
   return (
-    <section className="w-full max-w-md mx-auto space-y-10 text-center">
+    <section className="w-full max-w-md mx-auto space-y-10 text-center flex gap-5 flex-col">
       <header className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-white/60">
+        <p className="text-xs uppercase tracking-[0.2em]">
           Welcome back
-        </p>
-        <h2 className="text-2xl font-semibold">Sign in to DokuFlow</h2>
-        <p className="text-sm text-white/70 leading-relaxed">
-          Access your teams, projects, and documents securely.
         </p>
       </header>
 
       <form
         onSubmit={handleLoginSubmit}
-        className="glass p-9 space-y-7 rounded-2xl text-left w-full"
+        className="glass p-9 space-y-7 rounded-2xl text-left w-full flex flex-col gap-5"
       >
         <label htmlFor="email" className="block space-y-3">
-          <span className="text-xs font-semibold tracking-wide text-white/60">
+          <span className="text-xs font-semibold tracking-wide">
             Work email
           </span>
           <input
@@ -53,7 +49,7 @@ export const LoginForm = () => {
         </label>
 
         <label htmlFor="password" className="block space-y-3">
-          <span className="text-xs font-semibold tracking-wide text-white/60">
+          <span className="text-xs font-semibold tracking-wide">
             Password
           </span>
           <input
@@ -66,15 +62,15 @@ export const LoginForm = () => {
         </label>
 
         {error && (
-          <div className="glass border border-red-500/40 bg-red-500/10 text-red-100 text-sm px-3 py-2 rounded">
+          <div className="glass border border-red-500/40 bg-red-500/10 text-sm px-3 py-2 rounded" style={{ color: 'var(--color-text)' }}>
             {error.message}
           </div>
         )}
 
         <button
           type="submit"
-          className="glass-btn w-full sm:w-auto justify-center mx-auto px-6"
-        >
+          className="glass-btn sm:flex-stretch md:w-50 justify-center mx-auto px-6"
+        > 
           Sign in
         </button>
       </form>

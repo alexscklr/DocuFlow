@@ -1,28 +1,57 @@
 @import "tailwindcss";
 
-:root {
-  color: #e9edf5;
-  background-color: #04070f;
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
+
+
+
+
+body {
+  /* Default: Dark Theme */
+  --color-bg: #04070f;
+  --color-text: #e9edf5;
+  --color-glass-bg: rgba(255, 255, 255, 0.04);
+  --color-glass-border: rgba(255, 255, 255, 0.12);
+  --color-glass-btn-bg: rgba(255, 255, 255, 0.04);
+  --color-glass-btn-border: rgba(255, 255, 255, 0.12);
+  --color-glass-btn-hover: rgba(255, 255, 255, 0.10);
+  --color-glass-btn-hover-border: rgba(255, 255, 255, 0.20);
+  --color-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  --color-link: #e9edf5;
 }
+
+body.light {
+  --color-bg: #ece0a7;
+  --color-text: #2a1858;
+  --color-glass-bg: rgba(255, 255, 255, 0.5);
+  --color-glass-border: #ffe066;
+  --color-glass-btn-bg: rgba(255,255,255, 0.6);
+  --color-glass-btn-border: #a5d8ff;
+  --color-glass-btn-hover: linear-gradient(90deg, #a5d8ff 0%, #d0bfff 100%);
+  --color-glass-btn-hover-border: #845ef7;
+  --color-shadow: 0 20px 60px rgba(164, 97, 255, 0.10);
+  --color-link: #845ef7;
+}
+
 
 body {
   min-height: 100vh;
-  background: radial-gradient(circle at 20% -10%, rgba(88, 155, 255, 0.18), transparent 32%),
+  background:
+    radial-gradient(circle at 20% -10%, rgba(88, 155, 255, 0.18), transparent 32%),
     radial-gradient(circle at 80% 0%, rgba(255, 111, 145, 0.2), transparent 30%),
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02), rgba(4, 7, 15, 0.95) 55%),
-    #04070f;
-  color: #e9edf5;
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02), var(--color-bg) 55%),
+    var(--color-bg);
+  color: var(--color-text);
 }
 
+
 a {
-  color: inherit;
+  color: var(--color-link);
   text-decoration: none;
 }
 
 /* 1. Use a more-intuitive box-sizing model */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -46,18 +75,31 @@ body {
 }
 
 /* 6. Improve media defaults */
-img, picture, video, canvas, svg {
+img,
+picture,
+video,
+canvas,
+svg {
   display: block;
   max-width: 100%;
 }
 
 /* 7. Inherit fonts for form controls */
-input, button, textarea, select {
+input,
+button,
+textarea,
+select {
   font: inherit;
 }
 
 /* 8. Avoid text overflows */
-p, h1, h2, h3, h4, h5, h6 {
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   overflow-wrap: break-word;
 }
 
@@ -65,34 +107,70 @@ p, h1, h2, h3, h4, h5, h6 {
 p {
   text-wrap: pretty;
 }
-h1, h2, h3, h4, h5, h6 {
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   text-wrap: balance;
 }
 
 /*
   10. Create a root stacking context
 */
-#root, #__next {
+#root,
+#__next {
   isolation: isolate;
 }
 
+
+
 .glass {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--color-glass-bg);
+  border: 1px solid var(--color-glass-border);
   backdrop-filter: blur(16px);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--color-shadow);
+  color: var(--color-text);
 }
+
 
 .glass-btn {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--color-glass-btn-bg);
+  border: 1px solid var(--color-glass-btn-border);
   backdrop-filter: blur(16px);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-  @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white/90 transition duration-200 hover:bg-white/10 hover:border-white/20 active:-translate-y-[1px];
+  box-shadow: var(--color-shadow);
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s, transform 0.1s;
+  text-shadow: none;
+  /* hover/active handled below */
 }
 
+.glass-btn:hover {
+  background: var(--color-glass-btn-hover);
+  border-color: var(--color-glass-btn-hover-border);
+  transform: translateY(-1px);
+}
+
+.glass-btn:active {
+  transform: translateY(0);
+}
+
+
 .card-hover {
-  @apply transition duration-200 hover:-translate-y-1 hover:shadow-2xl;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 1.5px 6px rgba(0, 0, 0, 0.10);
 }
