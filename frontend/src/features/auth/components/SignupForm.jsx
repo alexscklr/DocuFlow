@@ -37,23 +37,23 @@ export const SignupForm = () => {
   };
 
   return (
-    <section className="w-full max-w-md mx-auto space-y-5 text-center">
-      <header className="space-y-1">
+    <section className="w-full max-w-md mx-auto space-y-10 text-center">
+      <header className="space-y-4">
         <p className="text-xs uppercase tracking-[0.2em] text-white/60">
           New account
         </p>
         <h2 className="text-2xl font-semibold">Create your DokuFlow ID</h2>
-        <p className="text-sm text-white/70">
+        <p className="text-sm text-white/70 leading-relaxed">
           Set up your profile to collaborate across teams and documents.
         </p>
       </header>
 
       <form
         onSubmit={handleSignupSubmit}
-        className="glass p-6 space-y-4 rounded-2xl text-left w-full"
+        className="glass p-9 space-y-7 rounded-2xl text-left w-full"
         aria-busy={loading}
       >
-        <label htmlFor="display_name" className="block space-y-1">
+        <label htmlFor="display_name" className="block space-y-3">
           <span className="text-xs font-semibold tracking-wide text-white/60">
             Display name
           </span>
@@ -66,7 +66,7 @@ export const SignupForm = () => {
           />
         </label>
 
-        <label htmlFor="email" className="block space-y-1">
+        <label htmlFor="email" className="block space-y-3">
           <span className="text-xs font-semibold tracking-wide text-white/60">
             Work email
           </span>
@@ -79,7 +79,7 @@ export const SignupForm = () => {
           />
         </label>
 
-        <label htmlFor="password" className="block space-y-1">
+        <label htmlFor="password" className="block space-y-3">
           <span className="text-xs font-semibold tracking-wide text-white/60">
             Password
           </span>
