@@ -1,0 +1,154 @@
+.organization-page {
+  background: #f3f3f3;
+  color: #0f0f0f;
+  min-height: 100vh;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+.organization-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  border-bottom: 2px solid #1d1d1d;
+  background: #fdfdfd;
+}
+
+.organization-brand {
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+}
+
+.organization-login {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: #1d1d1d;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+.organization-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 32px 64px;
+}
+
+.organization-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.organization-title {
+  font-size: 56px;
+  font-weight: 400;
+}
+
+.organization-add {
+  width: 64px;
+  height: 64px;
+  border: 3px solid #1d1d1d;
+  border-radius: 50%;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.organization-add-symbol {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.organization-divider {
+  height: 3px;
+  background: #0f0f0f;
+  margin: 14px 0 36px;
+}
+
+.organization-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 28px 30px;
+}
+
+.organization-card {
+  background: #ededed;
+  border: 2px solid #1f1f1f;
+  border-radius: 8px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 0 #888;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 160px;
+}
+
+.organization-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.organization-card-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.organization-card-icon {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #1f1f1f;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+}
+
+.organization-card-icon::before,
+.organization-card-icon::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 2px;
+  background: #1f1f1f;
+  top: 50%;
+  left: 50%;
+  transform-origin: center;
+}
+
+.organization-card-icon::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.organization-card-icon::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.organization-card-date {
+  font-size: 13px;
+  color: #222;
+}
+
+.organization-card-description {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #222;
+}
+
+@media (max-width: 640px) {
+  .organization-title {
+    font-size: 42px;
+  }
+
+  .organization-add {
+    width: 56px;
+    height: 56px;
+  }
+}

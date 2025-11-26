@@ -8,12 +8,15 @@ import { AccessPage } from './pages/Access/AccessPage';
 import { BackendTesting } from './testing/BackendTesting';
 import { ProfilePage } from './pages/Profile/ProfilePage';
 import ProjectsPage from '@/pages/projects/ProjectsPage';
+import OrganizationsPage from '@/pages/Organizations/OrganizationsPage';
 import viteLogo from '/vite.svg'
 
 
 function ThemeSwitch() {
-  // Default: dark
-  const [theme, setTheme] = React.useState(() => document.body.classList.contains('light') ? 'light' : 'dark');
+  // Default: light unless explicitly set to dark
+  const [theme, setTheme] = React.useState(() =>
+    document.body.classList.contains('dark') ? 'dark' : 'light'
+  );
   React.useEffect(() => {
     document.body.classList.remove('light', 'dark');
     document.body.classList.add(theme);
@@ -42,6 +45,7 @@ function App() {
           <Route path="/testing" element={<BackendTesting />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/organization" element={<OrganizationsPage />} />
         </Routes>
         {/* Footer */}
       </Router>
