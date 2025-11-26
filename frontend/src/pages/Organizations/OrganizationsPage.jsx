@@ -3,13 +3,23 @@ import { ORGANIZATION_PROJECTS } from "@/shared/lib";
 
 export function OrganizationsPage() {
   useEffect(() => {
-    // Force light theme while this page is visible to match the wireframe background.
-    document.body.classList.add("light");
-    return () => document.body.classList.remove("light");
+    // Temporarily simplify the background to a flat color for this page.
+    const previousBackground = document.body.style.background;
+    const previousBackgroundImage = document.body.style.backgroundImage;
+    document.body.style.background = "var(--color-bg)";
+    document.body.style.backgroundImage = "none";
+
+    return () => {
+      document.body.style.background = previousBackground;
+      document.body.style.backgroundImage = previousBackgroundImage;
+    };
   }, []);
 
   return (
-    <div className="min-h-screen text-[var(--color-text)]">
+    <div
+      className="min-h-screen text-[var(--color-text)]"
+      style={{ background: "var(--color-bg)" }}
+    >
       <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-text)]/30">
         <div className="text-3xl font-semibold">DokuFlow</div>
         <button type="button" className="text-sm">

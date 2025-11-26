@@ -1,64 +1,80 @@
 @import "tailwindcss";
 
-:root {
-  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  color-scheme: light;
-}
+
+
+
 
 body {
-  --color-bg: #f3f3f3;
-  --color-text: #0f0f0f;
-  --color-glass-bg: #ffffff;
-  --color-glass-border: #c8c8c8;
-  --color-glass-btn-bg: #ededed;
-  --color-glass-btn-border: #3a3a3a;
-  --color-glass-btn-hover: #dcdcdc;
-  --color-glass-btn-hover-border: #1f1f1f;
-  --color-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
-  --color-link: #0f0f0f;
-  min-height: 100vh;
-  background: var(--color-bg);
-  color: var(--color-text);
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
+  /* Default: Dark Theme */
+  --color-bg: #04070f;
+  --color-text: #e9edf5;
+  --color-glass-bg: rgba(255, 255, 255, 0.04);
+  --color-glass-border: rgba(255, 255, 255, 0.12);
+  --color-glass-btn-bg: rgba(255, 255, 255, 0.04);
+  --color-glass-btn-border: rgba(255, 255, 255, 0.12);
+  --color-glass-btn-hover: rgba(255, 255, 255, 0.10);
+  --color-glass-btn-hover-border: rgba(255, 255, 255, 0.20);
+  --color-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  --color-link: #e9edf5;
 }
 
-body.dark {
-  --color-bg: #0f0f0f;
-  --color-text: #f2f2f2;
-  --color-glass-bg: #161616;
-  --color-glass-border: #2e2e2e;
-  --color-glass-btn-bg: #1f1f1f;
-  --color-glass-btn-border: #f2f2f2;
-  --color-glass-btn-hover: #2a2a2a;
-  --color-glass-btn-hover-border: #f2f2f2;
-  --color-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
-  --color-link: #f2f2f2;
-  background: var(--color-bg);
+body.light {
+  --color-bg: #ece0a7;
+  --color-text: #2a1858;
+  --color-glass-bg: rgba(255, 255, 255, 0.5);
+  --color-glass-border: #ffe066;
+  --color-glass-btn-bg: rgba(255,255,255, 0.6);
+  --color-glass-btn-border: #a5d8ff;
+  --color-glass-btn-hover: linear-gradient(90deg, #a5d8ff 0%, #d0bfff 100%);
+  --color-glass-btn-hover-border: #845ef7;
+  --color-shadow: 0 20px 60px rgba(164, 97, 255, 0.10);
+  --color-link: #845ef7;
+}
+
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% -10%, rgba(88, 155, 255, 0.18), transparent 32%),
+    radial-gradient(circle at 80% 0%, rgba(255, 111, 145, 0.2), transparent 30%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02), var(--color-bg) 55%),
+    var(--color-bg);
   color: var(--color-text);
 }
+
 
 a {
   color: var(--color-link);
   text-decoration: none;
 }
 
+/* 1. Use a more-intuitive box-sizing model */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
+/* 2. Remove default margin */
 * {
   margin: 0;
 }
 
+/* 3. Enable keyword animations */
 @media (prefers-reduced-motion: no-preference) {
   html {
     interpolate-size: allow-keywords;
   }
 }
 
+body {
+  /* 4. Add accessible line-height */
+  line-height: 1.5;
+  /* 5. Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 6. Improve media defaults */
 img,
 picture,
 video,
@@ -68,6 +84,7 @@ svg {
   max-width: 100%;
 }
 
+/* 7. Inherit fonts for form controls */
 input,
 button,
 textarea,
@@ -75,6 +92,7 @@ select {
   font: inherit;
 }
 
+/* 8. Avoid text overflows */
 p,
 h1,
 h2,
@@ -85,6 +103,7 @@ h6 {
   overflow-wrap: break-word;
 }
 
+/* 9. Improve line wrapping */
 p {
   text-wrap: pretty;
 }
@@ -98,33 +117,42 @@ h6 {
   text-wrap: balance;
 }
 
+/*
+  10. Create a root stacking context
+*/
 #root,
 #__next {
   isolation: isolate;
 }
 
+
+
 .glass {
   background: var(--color-glass-bg);
   border: 1px solid var(--color-glass-border);
-  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  border-radius: 16px;
   box-shadow: var(--color-shadow);
   color: var(--color-text);
 }
 
+
 .glass-btn {
   background: var(--color-glass-btn-bg);
   border: 1px solid var(--color-glass-btn-border);
-  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  border-radius: 16px;
   box-shadow: var(--color-shadow);
   color: var(--color-text);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1.1rem;
-  font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  transition: background 0.2s, border-color 0.2s, transform 0.1s;
   text-shadow: none;
+  /* hover/active handled below */
 }
 
 .glass-btn:hover {
@@ -137,13 +165,14 @@ h6 {
   transform: translateY(0);
 }
 
+
 .card-hover {
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18), 0 1.5px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 1.5px 6px rgba(0, 0, 0, 0.10);
 }
 
 .distance-bottom-xs {
