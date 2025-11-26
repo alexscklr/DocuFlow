@@ -174,3 +174,23 @@ h6 {
   transform: translateY(-4px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 1.5px 6px rgba(0, 0, 0, 0.10);
 }
+
+.distance-bottom-xs {
+  margin-bottom: 4px;
+}
+
+.distance-bottom-sm {
+  margin-bottom: 8px;
+}
+
+.distance-bottom-md {
+  margin-bottom: 16px;
+}
+
+.distance-bottom-lg {
+  margin-bottom: 24px;
+}
+
+.distance-bottom-xl {
+  margin-bottom: 32px;
+}

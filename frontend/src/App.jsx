@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import './App.css'
 import { Button } from './shared/components'
@@ -8,6 +6,7 @@ import AppDataProvider from '@/shared/context/AppDataContext'
 import Main from './layout/main/Main'
 import { AccessPage } from './pages/Access/AccessPage';
 import { BackendTesting } from './testing/BackendTesting';
+import { ProfilePage } from './pages/Profile/ProfilePage';
 import ProjectsPage from '@/pages/projects/ProjectsPage';
 import viteLogo from '/vite.svg'
 
@@ -42,6 +41,7 @@ function App() {
           <Route path="/access" element={<AccessPage />} />
           <Route path="/testing" element={<BackendTesting />} />
           <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
         {/* Footer */}
       </Router>
