@@ -1,11 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import supabase from '@/services/supabaseClient';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useProfile, useOrganizations } from '../hooks';
+import { useAuthSession } from '../hooks/useAuthSession';
 import AppDataContext from './AppDataContextBase';
 
 export default function AppDataProvider({ children }) {
-  const [session, setSession] = useState(null);
-  const [user, setUser] = useState(null);
+  const { session, user, authLoading, authError, signOut, changeEmail } = useAuthSession();
   const { profile, updateProfile } = useProfile(user);
 
   // Organizations & Projects State via Hooks
@@ -14,39 +13,14 @@ export default function AppDataProvider({ children }) {
   // Beispiel: const { projects, ... } = useProjects(selectedOrgId);
   const [permissions, setPermissions] = useState({});
 
-  // Kombiniertes Loading/Error für globalen Context
-  const loading = orgLoading;
-  const error = orgError;
+  // Kombiniertes Loading/Error für globalen Context (Auth + Orgs)
+  const loading = authLoading || orgLoading;
+  const error = authError || orgError;
 
-  // Session & user bootstrap
+  // Permissions zurücksetzen wenn kein User
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      const {
-        data: { session },
-        error: _sessionError,
-      } = await supabase.auth.getSession();
-      if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-    })();
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      mounted = false;
-      listener.subscription.unsubscribe();
-    };
-  }, []);
-
-  const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
-    // Lokale States werden durch die Hooks automatisch zurückgesetzt
-    setPermissions({});
-  }, []);
+    if (!user) setPermissions({});
+  }, [user]);
 
   // Auto-load organizations when user appears
   useEffect(() => {
@@ -66,16 +40,17 @@ export default function AppDataProvider({ children }) {
     permissions,
     loading,
     error,
-  // actions
+    // actions
     loadOrganizations,
     addOrganization,
     updateOrganization,
     deleteOrganization,
     signOut,
+    changeEmail,
     // profile actions
     updateProfile,
     // Hinweis: Projekte werden jetzt über useProjects(organizationId) in Komponenten geladen
-  }), [session, user, profile, organizations, permissions, loading, error, loadOrganizations, addOrganization, updateOrganization, deleteOrganization, signOut, updateProfile]);
+  }), [session, user, profile, organizations, permissions, loading, error, loadOrganizations, addOrganization, updateOrganization, deleteOrganization, signOut, changeEmail, updateProfile]);
 
   return (
     <AppDataContext.Provider value={value}>

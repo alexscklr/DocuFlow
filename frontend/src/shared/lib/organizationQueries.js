@@ -1,6 +1,7 @@
 import supabase from "@/services/supabaseClient";
 
-export const createOrganization = async (name, description) => {
+export const createOrganization = async (details) => {
+    const { name, description } = details || {};
     const { data, error } = await supabase.rpc('create_organization', {
         neworg_name: name,
         neworg_description: description
@@ -18,13 +19,6 @@ export const getOrganizations = async () => {
     return { data, error };
 }
 
-export const getProjectsByOrganization = async (organizationId) => {
-    const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('organization_id', organizationId);
-    return { data, error };
-}
 
 export const getPermissionsForRole = async (roleId) => {
     const { data, error } = await supabase
@@ -43,14 +37,6 @@ export const updateOrganization = async (orgId, updates) => {
 }
 
 export const deleteOrganization = async (orgId) => {
-    // If your DB doesn't have ON DELETE CASCADE for all related tables,
-    // prefer creating a Postgres function (RPC) to perform a safe cascade delete
-    // with proper permission checks (owner/admin only).
-    const { data, error } = await supabase
-        .from('organizations')
-        .delete()
-        .eq('id', orgId)
-        .select()
-        .maybeSingle();
+    const { data, error } = await supabase.rpc('delete_organization', { p_org_id: orgId });
     return { data, error };
 }

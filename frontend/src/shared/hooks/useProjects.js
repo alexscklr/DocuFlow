@@ -22,9 +22,16 @@ export function useProjects(organizationId) {
 	// Projekt anlegen
 	const addProjectHandler = useCallback(async (project) => {
 		const { data, error } = await createProject({ ...project, organization_id: organizationId });
-		if (!error) setProjects((prev) => [...prev, data]);
+		if (!error) {
+			if (data && data.id) {
+				setProjects((prev) => [...prev, data]);
+			} else {
+				// Falls RPC kein vollständiges Objekt zurückliefert → neu laden
+				await loadProjects();
+			}
+		}
 		return { data, error };
-	}, [organizationId]);
+	}, [organizationId, loadProjects]);
 
 	// Projekt aktualisieren
 	const updateProjectHandler = useCallback(async (projectId, updates) => {

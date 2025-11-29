@@ -13,6 +13,7 @@ export function useProfile(user) {
     }
   }, [user]);
 
+  //updates im format { display_name: 'new name', ... }
   const updateProfileData = useCallback(async (updates) => {
     if (!user?.id) return { data: null, error: new Error('No user id') };
     const { data, error } = await updateProfile(user.id, updates);

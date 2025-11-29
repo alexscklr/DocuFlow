@@ -20,9 +20,9 @@ export function useOrganizations(userId) {
 	}, [userId]);
 
 	// Organisation anlegen
-	const addOrganizationHandler = useCallback(async (name, description) => {
-		const { data, error } = await createOrganization(name, description);
-		if (!error) setOrganizations((prev) => [data, ...prev]);
+	const addOrganizationHandler = useCallback(async (details) => {
+		const { data, error } = await createOrganization(details);
+		if (!error && data) setOrganizations((prev) => [data, ...prev]);
 		return { data, error };
 	}, []);
 
