@@ -1,4 +1,4 @@
-import supabase from "../../services/supabaseClient";
+import { supabase } from "../../services/supabaseClient";
 
 
 // Fetch user profile by user ID
@@ -31,5 +31,22 @@ export const uploadAvatar = async (userId, file) => {
     cacheControl: '3600',
     upsert: true,
   });
+  return { data, error };
+}
+
+export async function getUserProjects(userId) {
+  const { data, error } = await supabase
+    .from("project_members")
+    .select(`
+      id,
+      role:roles(name),
+      project:projects(
+        id,
+        name,
+        organization:organizations(name)
+      )
+    `)
+    .eq("user_id", userId);
+
   return { data, error };
 }

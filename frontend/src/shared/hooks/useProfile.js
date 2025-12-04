@@ -1,6 +1,8 @@
 // useProfile.js
 import { useState, useEffect, useCallback } from 'react';
 import { getProfileByUserId, updateProfile } from '@/shared/lib/profileQueries';
+import { getUserProjects } from "@/shared/lib/profileQueries"; 
+import { useAppData } from "@/shared/context/AppDataContextBase";
 
 export function useProfile(user) {
   const [profile, setProfile] = useState(null);
@@ -22,4 +24,22 @@ export function useProfile(user) {
   }, [user]);
 
   return { profile, updateProfile: updateProfileData };
+}
+
+export function useUserProjects() {
+  const { user } = useAppData();
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.id) 
+      return;
+
+    getUserProjects(user.id).then(({ data }) => {
+      setProjects(data || []);
+      setLoading(false);
+    });
+  }, [user]);
+
+  return { projects, loading };
 }

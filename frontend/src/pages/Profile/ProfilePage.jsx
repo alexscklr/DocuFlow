@@ -1,7 +1,10 @@
 import { useParams } from "react-router-dom";
+import { ProjectField } from '@/shared/components';
+import { useUserProjects } from "@/shared/hooks/useProfile";
 
 export function ProfilePage() {
   const { profileId } = useParams();
+  const { projects, loading } = useUserProjects();
 
   const initial = profileId ? profileId[0]?.toUpperCase() : "U";
 
@@ -31,26 +34,20 @@ export function ProfilePage() {
             <h2 className="text-xl font-semibold flex items-center gap-2 distance-bottom-md"> <span>🗂️</span> Projects </h2>
 
             <div className="grid grid-cols-2 gap-4">
-
-              <div className="border rounded-lg p-4">
-                <p className="text-xs text-gray-500">Project name</p>
-                <p className="text-xs text-gray-400">Organization name</p>
-              </div>
-
-              <div className="border rounded-lg p-4">
-                <p className="text-xs text-gray-500">Project name</p>
-                <p className="text-xs text-gray-400">Organization name</p>
-              </div>
-
-              <div className="border rounded-lg p-4">
-                <p className="text-xs text-gray-500">Project name</p>
-                <p className="text-xs text-gray-400">Organization name</p>
-              </div>
-
-              <div className="border rounded-lg p-4">
-                <p className="text-xs text-gray-500">Project name</p>
-                <p className="text-xs text-gray-400">Organization name</p>
-              </div>
+              {projects.length === 0 ? (
+                <p className="text-gray-400 col-span-2">
+                  You don’t have any current projects.
+                </p>
+              ) : (
+                projects.map(p => (
+                  <ProjectField
+                    key={p.id}
+                    projectName={p.project.name}
+                    organizationName={p.project.organization.name}
+                    roleName={p.role.name}
+                  />
+                ))
+              )}
             </div>  
           </section>
 
