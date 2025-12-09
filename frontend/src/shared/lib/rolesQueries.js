@@ -25,10 +25,37 @@ export async function getPermissions() {
 }
 
 export async function getRolePermissions(role_id) {
-  const { data, error } = await supabase
+  if (!role_id) return { data: [], error: null };
+  // Prefer eq for single id, but fallback to in() or per-id fetch if API rejects
+  let data = null;
+  let error = null;
+  const { data: d1, error: e1 } = await supabase
     .from('role_permissions')
-    .select('id, role_id, permission_id, permissions(id, name, description)')
+    .select('role_id, permission_id')
     .eq('role_id', role_id);
+  if (!e1) {
+    data = d1;
+  } else {
+    const { data: d2, error: e2 } = await supabase
+      .from('role_permissions')
+      .select('role_id, permission_id')
+      .in('role_id', [role_id]);
+    if (!e2) {
+      data = d2;
+    } else {
+      // Final fallback: per-id maybeSingle then normalize to array
+      const { data: d3, error: e3 } = await supabase
+        .from('role_permissions')
+        .select('role_id, permission_id')
+        .eq('role_id', role_id)
+        .maybeSingle();
+      if (!e3 && d3) {
+        data = [d3];
+      } else {
+        error = e3 || e2 || e1;
+      }
+    }
+  }
   return { data, error };
 }
 
@@ -36,17 +63,18 @@ export async function addPermissionToRole(role_id, permission_id) {
   const { data, error } = await supabase
     .from('role_permissions')
     .insert([{ role_id, permission_id }])
-    .select()
-    .maybeSingle();
-  return { data, error };
+    .select('role_id, permission_id');
+  // select() returns an array; normalize to single entry
+  const row = Array.isArray(data) ? data[0] : data;
+  return { data: row, error };
 }
 
-export async function removePermissionFromRole(role_permission_id) {
+export async function removePermissionFromRole(role_id, permission_id) {
   const { data, error } = await supabase
     .from('role_permissions')
     .delete()
-    .eq('id', role_permission_id)
-    .select('id')
-    .maybeSingle();
+    .eq('role_id', role_id)
+    .eq('permission_id', permission_id)
+    .select('role_id, permission_id');
   return { data, error };
 }

@@ -65,7 +65,7 @@ export default function OrganizationMembers({ organizationId }) {
                   <img src={profile.avatar_url} alt="avatar" className="w-6 h-6 rounded-full object-cover" />
                 )}
                 {display}
-                {m.roles?.name && <span className="ml-2 text-[var(--text-secondary)]">({m.roles.name})</span>}
+                {m.role_name && <span className="ml-2 text-[var(--text-secondary)]">({m.role_name})</span>}
               </span>
               <button
                 type="button"

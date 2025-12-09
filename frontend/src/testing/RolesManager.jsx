@@ -4,17 +4,22 @@ import { getRoles, addRole, deleteRole, getPermissions, getRolePermissions, addP
 export default function RolesManager({ scope = 'organization', organizationId = null, projectId = null }) {
   const [roles, setRoles] = useState([]);
   const [permissions, setPermissions] = useState([]);
+  const permissionsMap = Object.fromEntries(permissions.map(p => [p.id, p]));
+  const scopedPermissions = permissions.filter(p => p.scope === scope);
   const [selectedRoleId, setSelectedRoleId] = useState(null);
   const [newRole, setNewRole] = useState({ name: '', description: '' });
   const [rolePerms, setRolePerms] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [permError, setPermError] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data: r } = await getRoles({ scope, organization_id: organizationId, project_id: projectId });
-    const { data: p } = await getPermissions();
+    const { data: r, error: er } = await getRoles({ scope, organization_id: organizationId, project_id: projectId });
+    const { data: p, error: ep } = await getPermissions();
     setRoles(r || []);
     setPermissions(p || []);
+    setError(er || ep || null);
     setLoading(false);
   }, [scope, organizationId, projectId]);
 
@@ -22,9 +27,15 @@ export default function RolesManager({ scope = 'organization', organizationId = 
 
   useEffect(() => {
     const loadPerms = async () => {
+      setPermError(null);
       if (!selectedRoleId) { setRolePerms([]); return; }
-      const { data } = await getRolePermissions(selectedRoleId);
-      setRolePerms(data || []);
+      const { data, error } = await getRolePermissions(selectedRoleId);
+      if (error) {
+        setPermError(error);
+        setRolePerms([]);
+      } else {
+        setRolePerms(data || []);
+      }
     };
     loadPerms();
   }, [selectedRoleId]);
@@ -48,18 +59,28 @@ export default function RolesManager({ scope = 'organization', organizationId = 
 
   const addPerm = async (permission_id) => {
     if (!selectedRoleId) return;
+    const perm = permissionsMap[permission_id];
+    if (!perm || perm.scope !== scope) {
+      return;
+    }
     const { data, error } = await addPermissionToRole(selectedRoleId, permission_id);
     if (!error && data) setRolePerms(prev => [...prev, data]);
   };
 
-  const removePerm = async (role_permission_id) => {
-    const { error } = await removePermissionFromRole(role_permission_id);
-    if (!error) setRolePerms(prev => prev.filter(rp => rp.id !== role_permission_id));
+  const removePerm = async (permission_id) => {
+    if (!selectedRoleId) return;
+    const { error } = await removePermissionFromRole(selectedRoleId, permission_id);
+    if (!error) setRolePerms(prev => prev.filter(rp => rp.permission_id !== permission_id));
   };
 
   return (
     <div className="glass p-4 rounded-xl flex flex-col gap-4">
       <h3 className="font-semibold">Rollen verwalten ({scope})</h3>
+      {error && (
+        <div className="p-2 rounded bg-[var(--danger)] text-[var(--text-on-accent)] text-sm">
+          Fehler beim Laden: {error.message}
+        </div>
+      )}
       <div className="flex flex-wrap gap-2 items-end">
         <input
           type="text"
@@ -95,21 +116,30 @@ export default function RolesManager({ scope = 'organization', organizationId = 
         </div>
         <div className="flex-1">
           <h4 className="font-medium">Rechte</h4>
+          {permError && (
+            <div className="p-2 rounded bg-[var(--danger)] text-[var(--text-on-accent)] text-xs mb-2">
+              Fehler beim Laden der Rollenrechte: {permError.message}
+            </div>
+          )}
           <div className="flex flex-wrap gap-2">
-            {permissions.map(p => (
+            {scopedPermissions.map(p => (
               <button key={p.id} className="glass glass-btn" onClick={() => addPerm(p.id)} disabled={!selectedRoleId}>
-                + {p.name}
+                + {p.permission}
               </button>
             ))}
           </div>
           <h4 className="font-medium mt-3">Rechte der Rolle</h4>
           <ul className="space-y-2">
-            {rolePerms.map(rp => (
-              <li key={rp.id} className="flex items-center justify-between p-2 rounded border border-[var(--border)] bg-[var(--bg-tertiary)]">
-                <span>{rp.permissions?.name || rp.permission_id}</span>
-                <button className="glass glass-btn" onClick={() => removePerm(rp.id)}>Entfernen</button>
-              </li>
-            ))}
+            {Array.from(new Map(rolePerms.map(rp => [`${rp.role_id}:${rp.permission_id}`, rp])).values()).map(rp => {
+              const perm = permissionsMap[rp.permission_id];
+              const label = perm ? perm.permission : rp.permission_id;
+              return (
+                <li key={`${rp.role_id}:${rp.permission_id}`} className="flex items-center justify-between p-2 rounded border border-[var(--border)] bg-[var(--bg-tertiary)]">
+                  <span>{label}</span>
+                  <button className="glass glass-btn" onClick={() => removePerm(rp.permission_id)}>Entfernen</button>
+                </li>
+              );
+            })}
             {selectedRoleId && rolePerms.length === 0 && <li className="italic text-sm text-[var(--text-secondary)]">Keine Rechte für diese Rolle</li>}
           </ul>
         </div>

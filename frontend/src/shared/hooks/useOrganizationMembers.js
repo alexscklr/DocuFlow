@@ -16,7 +16,9 @@ export function useOrganizationMembers(organizationId) {
       const base = data ?? [];
       // Enrich with profile display_name/username
       const ids = [...new Set(base.map(m => m.user_id).filter(Boolean))];
+      const roleIds = [...new Set(base.map(m => m.role_id).filter(Boolean))];
       let profileMap = {};
+      let rolesMap = {};
       if (ids.length) {
         let profiles = [];
         if (ids.length === 1) {
@@ -44,11 +46,19 @@ export function useOrganizationMembers(organizationId) {
         }
         (profiles || []).forEach(p => { profileMap[p.id] = p; });
       }
+      if (roleIds.length) {
+        const { data: roles } = await supabase
+          .from('roles')
+          .select('id, name')
+          .in('id', roleIds);
+        (roles || []).forEach(r => { rolesMap[r.id] = r; });
+      }
       setMembers(base.map(m => ({
         ...m,
         display_name: profileMap[m.user_id]?.display_name || null,
           avatar_url: profileMap[m.user_id]?.avatar_url || null,
           phone_number: profileMap[m.user_id]?.phone_number || null,
+        role_name: rolesMap[m.role_id]?.name || null,
       })));
     }
     setError(error);
