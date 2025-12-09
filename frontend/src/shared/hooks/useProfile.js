@@ -26,20 +26,33 @@ export function useProfile(user) {
   return { profile, updateProfile: updateProfileData };
 }
 
-export function useUserProjects() {
-  const { user } = useAppData();
+export function useUserProjectsById(userId) {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?.id) 
-      return;
+    if (!userId) return;
 
-    getUserProjects(user.id).then(({ data }) => {
+    getUserProjects(userId).then(({ data }) => {
       setProjects(data || []);
       setLoading(false);
     });
-  }, [user]);
+  }, [userId]);
 
   return { projects, loading };
+}
+
+export function useProfileById(userId) {
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    if (!userId) {
+      setProfile(null);
+      return;
+    }
+
+    getProfileByUserId(userId).then(({ data }) => setProfile(data));
+  }, [userId]);
+
+  return { profile };
 }

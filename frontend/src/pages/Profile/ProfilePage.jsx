@@ -1,12 +1,15 @@
 import { useParams } from "react-router-dom";
-import { ProjectField } from '@/shared/components';
-import { useUserProjects } from "@/shared/hooks/useProfile";
+import { ProjectField, InfoField } from '@/shared/components';
+import { useAppData } from '@/shared/context/AppDataContextBase';
+import { useUserProjectsById, useProfileById } from "@/shared/hooks/useProfile";
 
 export function ProfilePage() {
-  const { profileId } = useParams();
-  const { projects, loading } = useUserProjects();
+const { profileId } = useParams();
+const { user } = useAppData();
 
-  const initial = profileId ? profileId[0]?.toUpperCase() : "U";
+const viewedUserId = profileId ?? user.id;
+const { profile } = useProfileById(viewedUserId);
+const { projects, loading } = useUserProjectsById(viewedUserId);
 
   return (
     <div className="
@@ -28,7 +31,7 @@ export function ProfilePage() {
         {/* right side */}
         <section>
           <h1 className="text-4xl text-left font-semibold  distance-bottom-sm">Name</h1>
-          <hr className="border-white/20 distance-bottom-md"/>
+          <hr className="border-white/20 distance-bottom-md" />
 
           <section id="projectsSectionId" className="distance-bottom-md">
             <h2 className="text-xl font-semibold flex items-center gap-2 distance-bottom-md"> <span>🗂️</span> Projects </h2>
@@ -48,26 +51,25 @@ export function ProfilePage() {
                   />
                 ))
               )}
-            </div>  
+            </div>
           </section>
 
           <hr className="border-white/20 distance-bottom-md" />
-          
+
           <section id="personalInfoId" className="distance-bottom-md">
             <h2 className="text-xl font-semibold flex items-center gap-2 distance-bottom-sm"> <span>🗂️</span> Personal Information </h2>
-           
+
             <div className="grid grid-cols-1">
-              <p className="text-s text-left distance-bottom-xs">E-Mail</p>
-              <div className="border rounded-lg p-2 distance-bottom-md">
-                <p className="text-xs text-left text-gray-500">g@gmail.com</p>
-              </div>
+              <InfoField
+                title="E-Mail"
+                info={profile.email}
+              />
 
-              <p className="text-s text-left distance-bottom-xs">Phone</p>
-              <div className="border rounded-lg p-2 distance-bottom-md">
-                 <p className="text-xs text-left text-gray-500">+49151151515</p>
-              </div>
-
-            </div>  
+              <InfoField
+                title="Phone"
+                info={profile.phone_number}
+              />
+            </div>
           </section>
 
         </section>
