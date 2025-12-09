@@ -9,7 +9,6 @@ import { BackendTesting } from './testing/BackendTesting';
 import { ProfilePage } from './pages/Profile/ProfilePage';
 import ProjectsPage from '@/pages/projects/ProjectsPage';
 import { OrganizationsPage } from '@/pages/Organizations/OrganizationsPage';
-import viteLogo from '/vite.svg'
 import Header from './layout/header/Header';
 
 
@@ -35,11 +34,10 @@ function App() {
   return (
     <AppDataProvider>
       <Router>
-         {/*<ThemeSwitch />*/}
-        <Header/>
+        {/*<ThemeSwitch />*/}
+        <Header />
         <Routes>
           <Route path="/" element={<Main />} />
-          <Route path="/about" element={<Button icon={viteLogo} label="Back To Main" slug="/" />} />
           <Route path="/access" element={<AccessPage />} />
           <Route path="/testing" element={<BackendTesting />} />
           <Route path="/projects" element={<ProjectsPage />} />
