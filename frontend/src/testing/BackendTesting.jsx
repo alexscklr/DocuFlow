@@ -8,6 +8,7 @@ import InviteToProject from '@/testing/InviteToProject.jsx';
 import AcceptInvitation from '@/testing/AcceptInvite.jsx';
 import RolesManager from '@/testing/RolesManager.jsx';
 import { useProjects } from '@/shared/hooks/useProjects';
+import { getProfileByUserId } from '../shared/lib/profileQueries';
 
 export const BackendTesting = () => {
     // Organization creation form state
@@ -62,6 +63,9 @@ export const BackendTesting = () => {
 
     return (
         <div className="glass min-h-screen w-full flex flex-col items-center justify-start py-8 gap-6">
+                        <button onClick={async () => {
+                                console.log(user.email);
+                        }}>Klick me!</button>
             <h1 className="text-3xl font-bold mb-8">Testing Page</h1>
 
             <form

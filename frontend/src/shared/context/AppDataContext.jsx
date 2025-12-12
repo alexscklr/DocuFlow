@@ -11,6 +11,7 @@ export default function AppDataProvider({ children }) {
   const { organizations, loading: orgLoading, error: orgError, loadOrganizations, addOrganization, updateOrganization, deleteOrganization } = useOrganizations(user?.id);
   // Für Projekte: Organisation muss gewählt sein, daher kann man den Hook dynamisch pro OrgId nutzen
   // Beispiel: const { projects, ... } = useProjects(selectedOrgId);
+
   const [permissions, setPermissions] = useState({});
 
   // Kombiniertes Loading/Error für globalen Context (Auth + Orgs)

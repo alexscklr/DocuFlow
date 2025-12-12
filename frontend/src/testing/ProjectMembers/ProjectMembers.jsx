@@ -3,7 +3,7 @@ import { useProjectMembers } from '@/shared/hooks/useProjectMembers';
 import { useProfilesByIds } from '@/shared/hooks/useProfilesByIds';
 
 export default function ProjectMembers({ projectId }) {
-  const { members, loading, error, loadMembers, addMember, updateMember, removeMember } = useProjectMembers(projectId);
+  const { members, loading, error, loadMembers, addMember/*, updateMember*/, removeMember } = useProjectMembers(projectId);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ user_id: '', role_id: '' });
 

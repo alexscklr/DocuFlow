@@ -44,7 +44,8 @@ export async function signUpWithPasswordAndProfile(email, password, { displayNam
     const { data: profile, error: rpcError } = await supabase.rpc('create_user_with_profile', {
         p_user_id: user.id,
         p_display_name: displayName ?? null,
-        p_avatar_url: publicUrl
+        p_avatar_url: publicUrl,
+        p_email: email
     });
     if (rpcError) return { data: { user }, error: rpcError };
 

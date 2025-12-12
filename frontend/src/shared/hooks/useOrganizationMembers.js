@@ -24,19 +24,19 @@ export function useOrganizationMembers(organizationId) {
         if (ids.length === 1) {
           const { data: single, error: singleErr } = await supabase
               .from('user_profiles')
-              .select('id, display_name, avatar_url, phone_number')
+              .select('*')
             .eq('id', ids[0]);
           if (!singleErr && single) profiles = single;
         } else {
           const { data: batch, error: batchErr } = await supabase
               .from('user_profiles')
-              .select('id, display_name, avatar_url, phone_number')
+              .select('*')
             .in('id', ids);
           if (batchErr) {
             // Fallback: individual fetches
             const results = await Promise.all(ids.map(id => supabase
                 .from('user_profiles')
-                .select('id, display_name, avatar_url, phone_number')
+                .select('*')
               .eq('id', id)
               .maybeSingle()));
             profiles = results.map(r => r.data).filter(Boolean);

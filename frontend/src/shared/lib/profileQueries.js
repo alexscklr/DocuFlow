@@ -31,7 +31,13 @@ export const uploadAvatar = async (userId, file) => {
     cacheControl: '3600',
     upsert: true,
   });
-  return { data, error };
+  if (error) return { data: null, error };
+
+  const { data: pub } = supabase.storage.from('avatars').getPublicUrl(filePath);
+  const publicUrl = pub?.publicUrl ?? null;
+
+  const { data: updated, error: updateError } = await updateProfile(userId, { avatar_url: publicUrl });
+  return { data: { upload: data, publicUrl, profile: updated }, error: updateError ?? null };
 }
 
 export async function getUserProjects(userId) {
