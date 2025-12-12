@@ -44,15 +44,21 @@ export function useUserProjectsById(userId) {
 
 export function useProfileById(userId) {
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!userId) {
       setProfile(null);
+      setLoading(false);
       return;
     }
 
-    getProfileByUserId(userId).then(({ data }) => setProfile(data));
+    setLoading(true);
+    getProfileByUserId(userId).then(({ data }) => {
+      setProfile(data);
+      setLoading(false);
+    });
   }, [userId]);
 
-  return { profile };
+  return { profile, loading };
 }

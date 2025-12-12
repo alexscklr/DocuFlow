@@ -7,9 +7,21 @@ export function ProfilePage() {
 const { profileId } = useParams();
 const { user } = useAppData();
 
-const viewedUserId = profileId ?? user.id;
-const { profile } = useProfileById(viewedUserId);
-const { projects, loading } = useUserProjectsById(viewedUserId);
+const viewedUserId = profileId ?? user?.id;
+const { profile, loading: profileLoading } = useProfileById(viewedUserId);
+const { projects, loading: projectsLoading } = useUserProjectsById(viewedUserId);
+
+if (!viewedUserId) {
+  return <div className="p-8">Loading profile...</div>;
+}
+
+if (profileLoading || projectsLoading) {
+  return <div className="p-8">Loading...</div>;
+}
+
+if (!profile) {
+  return <div className="p-8">Profile not found.</div>;
+}
 
   return (
     <div className="
@@ -30,7 +42,7 @@ const { projects, loading } = useUserProjectsById(viewedUserId);
 
         {/* right side */}
         <section>
-          <h1 className="text-4xl text-left font-semibold  distance-bottom-sm">Name</h1>
+          <h1 className="text-4xl text-left font-semibold  distance-bottom-sm">{profile?.display_name || 'Profile'}</h1>
           <hr className="border-white/20 distance-bottom-md" />
 
           <section id="projectsSectionId" className="distance-bottom-md">
@@ -62,12 +74,12 @@ const { projects, loading } = useUserProjectsById(viewedUserId);
             <div className="grid grid-cols-1">
               <InfoField
                 title="E-Mail"
-                info={profile.email}
+                info={profile?.email || 'N/A'}
               />
 
               <InfoField
                 title="Phone"
-                info={profile.phone_number}
+                info={profile?.phone_number || 'N/A'}
               />
             </div>
           </section>

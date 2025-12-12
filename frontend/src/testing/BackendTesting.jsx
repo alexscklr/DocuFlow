@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAppData } from '@/shared/context/AppDataContextBase';
+import { getProfileByUserId } from '@/shared/lib/profileQueries';
 
 
 export const BackendTesting = () => {
@@ -42,6 +43,15 @@ export const BackendTesting = () => {
     return (
         <div className="glass min-h-screen w-full flex flex-col items-center justify-start py-8 gap-6">
             <h1 className="text-3xl font-bold mb-8">Testing Page</h1>
+            <button onClick={async () => {
+                                if (!user?.id) { console.warn('No user logged in'); return; }
+                                const { data, error } = await getProfileByUserId(user.id);
+                                if (error) {
+                                    console.error('Profile fetch error:', error);
+                                } else {
+                                    console.log('Profile:', data);
+                                }
+                        }}>Klick me!</button>
 
             <form
                 onSubmit={handleSubmit}
