@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useProfile, useOrganizations } from '../hooks';
 import { useAuthSession } from '../hooks/useAuthSession';
 import AppDataContext from './AppDataContextBase';
@@ -7,30 +7,52 @@ export default function AppDataProvider({ children }) {
   const { session, user, authLoading, authError, signOut, changeEmail } = useAuthSession();
   const { profile, updateProfile } = useProfile(user);
 
-  // Organizations & Projects State via Hooks
-  const { organizations, loading: orgLoading, error: orgError, loadOrganizations, addOrganization, updateOrganization, deleteOrganization } = useOrganizations(user?.id);
-  // Für Projekte: Organisation muss gewählt sein, daher kann man den Hook dynamisch pro OrgId nutzen
-  // Beispiel: const { projects, ... } = useProjects(selectedOrgId);
+  const {
+    organizations,
+    loading: orgLoading,
+    error: orgError,
+    loadOrganizations: loadOrgsRaw,
+    addOrganization: addOrgRaw,
+    updateOrganization: updateOrgRaw,
+    deleteOrganization: deleteOrgRaw
+  } = useOrganizations(user?.id);
 
   const [permissions, setPermissions] = useState({});
 
-  // Kombiniertes Loading/Error für globalen Context (Auth + Orgs)
+  // Combine global loading / error
   const loading = authLoading || orgLoading;
   const error = authError || orgError;
 
-  // Permissions zurücksetzen wenn kein User
+  // Wrap actions in useCallback to stabilize references for useMemo
+  const loadOrganizations = useCallback(() => {
+    if (user) loadOrgsRaw();
+  }, [user, loadOrgsRaw]);
+
+  const addOrganization = useCallback(addOrgRaw, [addOrgRaw]);
+  const updateOrganization = useCallback(updateOrgRaw, [updateOrgRaw]);
+  const deleteOrganization = useCallback(deleteOrgRaw, [deleteOrgRaw]);
+
+  // Reset permissions if no user
   useEffect(() => {
     if (!user) setPermissions({});
   }, [user]);
 
   // Auto-load organizations when user appears
   useEffect(() => {
-    if (user) {
-      loadOrganizations();
-    } else {
-      setPermissions({});
-    }
+    if (user) loadOrganizations();
   }, [user, loadOrganizations]);
+
+  // Optional: derive permissions from profile or organizations
+  useEffect(() => {
+    if (user && organizations) {
+      // Beispiel: setPermissions aus den Rollen der Org-Mitgliedschaften
+      const perms = {};
+      organizations.forEach(org => {
+        if (org.role) perms[org.id] = org.role; // simple example
+      });
+      setPermissions(perms);
+    }
+  }, [user, organizations]);
 
   const value = useMemo(() => ({
     // state
@@ -50,8 +72,23 @@ export default function AppDataProvider({ children }) {
     changeEmail,
     // profile actions
     updateProfile,
-    // Hinweis: Projekte werden jetzt über useProjects(organizationId) in Komponenten geladen
-  }), [session, user, profile, organizations, permissions, loading, error, loadOrganizations, addOrganization, updateOrganization, deleteOrganization, signOut, changeEmail, updateProfile]);
+    // Hinweis: Projekte werden über useProjects(organizationId) in Komponenten geladen
+  }), [
+    session,
+    user,
+    profile,
+    organizations,
+    permissions,
+    loading,
+    error,
+    loadOrganizations,
+    addOrganization,
+    updateOrganization,
+    deleteOrganization,
+    signOut,
+    changeEmail,
+    updateProfile
+  ]);
 
   return (
     <AppDataContext.Provider value={value}>

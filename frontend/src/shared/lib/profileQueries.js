@@ -25,21 +25,82 @@ export const updateProfile = async (userId, updates) => {
   return { data, error };
 }
 
-export const uploadAvatar = async (userId, file) => {
-  const filePath = `avatars/${userId}/${file.name}`;
-  const { data, error } = await supabase.storage.from('avatars').upload(filePath, file, {
+// Helper: Löscht alle alten Avatare des Benutzers
+const deleteOldAvatars = async (userId) => {
+  const bucket = supabase.storage.from('avatars');
+  const { data: existingFiles, error: listError } = await bucket.list(userId);
+  
+  if (listError) return { error: listError };
+  if (!existingFiles || existingFiles.length === 0) return { error: null };
+
+  const filesToDelete = existingFiles.map(f => `${userId}/${f.name}`);
+  const { error: deleteError } = await bucket.remove(filesToDelete);
+  
+  return { error: deleteError };
+};
+
+// Helper: Lädt eine neue Avatar-Datei hoch
+const uploadAvatarFile = async (userId, file) => {
+  const bucket = supabase.storage.from('avatars');
+  const filePath = `${userId}/${file.name}`;
+  
+  const { data: uploadData, error } = await bucket.upload(filePath, file, {
     cacheControl: '3600',
     upsert: true,
   });
-  if (error) return { data: null, error };
 
-  const { data: pub } = supabase.storage.from('avatars').getPublicUrl(filePath);
+  return { uploadData, filePath, error };
+};
+
+// Helper: Holt die öffentliche URL für den Avatar
+const getAvatarPublicUrl = (filePath) => {
+  const bucket = supabase.storage.from('avatars');
+  const { data: pub } = bucket.getPublicUrl(filePath);
   const publicUrl = pub?.publicUrl ?? null;
 
-  const { data: updated, error: updateError } = await updateProfile(userId, { avatar_url: publicUrl });
-  return { data: { upload: data, publicUrl, profile: updated }, error: updateError ?? null };
-}
+  if (!publicUrl) {
+    return { publicUrl: null, error: new Error('Failed to get public URL') };
+  }
 
+  return { publicUrl, error: null };
+};
+
+// Helper: Aktualisiert das Profil mit der neuen Avatar-URL
+const updateAvatarInProfile = async (userId, publicUrl) => {
+  const { data: updatedProfile, error } = await updateProfile(userId, { avatar_url: publicUrl });
+  return { updatedProfile, error };
+};
+
+// Main: Orchestriert den kompletten Avatar-Upload-Prozess
+export const uploadAvatar = async (userId, file) => {
+  // 1. Alte Avatare löschen
+  const deleteResult = await deleteOldAvatars(userId);
+  if (deleteResult.error) return { data: null, error: deleteResult.error };
+
+  // 2. Neuen Avatar hochladen
+  const uploadResult = await uploadAvatarFile(userId, file);
+  if (uploadResult.error) return { data: null, error: uploadResult.error };
+
+  // 3. Öffentliche URL abrufen
+  const urlResult = getAvatarPublicUrl(uploadResult.filePath);
+  if (urlResult.error) return { data: null, error: urlResult.error };
+
+  // 4. Profil aktualisieren
+  const profileResult = await updateAvatarInProfile(userId, urlResult.publicUrl);
+  if (profileResult.error) return { data: null, error: profileResult.error };
+
+  return { 
+    data: { 
+      upload: uploadResult.uploadData, 
+      publicUrl: urlResult.publicUrl, 
+      profile: profileResult.updatedProfile 
+    }, 
+    error: null 
+  };
+};
+
+
+//Daniil
 export async function getUserProjects(userId) {
   const { data, error } = await supabase
     .from("project_members")

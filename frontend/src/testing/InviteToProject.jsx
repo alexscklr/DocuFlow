@@ -8,7 +8,7 @@ export default function InviteToProject({ projectId }) {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [inviteUrl, setInviteUrl] = useState(null);
-  const [inviteToken, setInviteToken] = useState(null);
+  //const [inviteToken, setInviteToken] = useState(null);
   // const [sendingEmail, setSendingEmail] = useState(false); // Currently not supported
 
   useEffect(() => {
@@ -35,12 +35,13 @@ export default function InviteToProject({ projectId }) {
     if (token) {
       const url = `${window.location.origin}/invite?token=${token}`;
       setInviteUrl(url);
-      setInviteToken(token);
+      //setInviteToken(token);
       setEmail("");
     }
   };
 
-  // Currently not supported
+  // Currently not supported due to missing domain for smtp settings
+  //
   // const handleSendEmail = async () => {
   //   if (!inviteToken || !email) return;
   //   

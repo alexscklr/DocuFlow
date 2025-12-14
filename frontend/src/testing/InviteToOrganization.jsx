@@ -8,7 +8,7 @@ export default function InviteToOrganization({ organizationId }) {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [inviteUrl, setInviteUrl] = useState(null);
-  const [inviteToken, setInviteToken] = useState(null);
+  //const [inviteToken, setInviteToken] = useState(null);
   // const [sendingEmail, setSendingEmail] = useState(false); // Currently not supported
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function InviteToOrganization({ organizationId }) {
     if (token) {
       const url = `${window.location.origin}/invite?token=${token}`;
       setInviteUrl(url);
-      setInviteToken(token);
+      //setInviteToken(token);
       setEmail("");
     }
   };

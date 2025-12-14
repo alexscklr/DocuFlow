@@ -36,7 +36,7 @@ export function ProjectCreationForm({ organizations, loading }) {
         onSubmit={handleSubmit}
         className="flex flex-col gap-4 glass p-6 w-stretch"
       >
-        <h2 className="text-xl font-semibold mb-2">Create Project Test Page</h2>
+        <h2 className="text-xl font-semibold mb-2">Create Project</h2>
         
         <select
           value={formData.organization_id}
