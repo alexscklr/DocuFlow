@@ -9,6 +9,7 @@ import { BackendTesting } from './testing/BackendTesting';
 import { ProfilePage } from './pages/Profile/ProfilePage';
 import ProjectsPage from '@/pages/projects/ProjectsPage';
 import { OrganizationsPage } from '@/pages/Organizations/OrganizationsPage';
+import AcceptInvitation from './testing/AcceptInvite';
 import Header from './layout/header/Header';
 
 
@@ -40,6 +41,7 @@ function App() {
           <Route path="/" element={<Main />} />
           <Route path="/access" element={<AccessPage />} />
           <Route path="/testing" element={<BackendTesting />} />
+          <Route path="/invite" element={<AcceptInvitation />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/organizations" element={<OrganizationsPage />} />
           <Route path="/profile" element={<ProfilePage />} />

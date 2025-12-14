@@ -1,24 +1,33 @@
 import { useEffect, useState } from "react";
-import { sendOrganizationInvite } from "@/shared/lib/inviteQueries";
+import { sendOrganizationInvite } from "@/shared/lib/inviteQueries"; // sendInviteEmail - Currently not supported
 import { getRoles } from "@/shared/lib/rolesQueries";
 
 export default function InviteToOrganization({ organizationId }) {
   const [email, setEmail] = useState("");
   const [roleId, setRoleId] = useState("");
   const [roles, setRoles] = useState([]);
-    useEffect(() => {
-      const loadRoles = async () => {
-        const { data } = await getRoles({ scope: 'organization', organization_id: organizationId });
-        setRoles(data || []);
-      };
-      if (organizationId) loadRoles();
-    }, [organizationId]);
   const [loading, setLoading] = useState(false);
+  const [inviteUrl, setInviteUrl] = useState(null);
+  const [inviteToken, setInviteToken] = useState(null);
+  // const [sendingEmail, setSendingEmail] = useState(false); // Currently not supported
+
+  useEffect(() => {
+    const loadRoles = async () => {
+      const { data } = await getRoles({ scope: 'organization', organization_id: organizationId });
+      setRoles(data || []);
+    };
+    if (organizationId) loadRoles();
+  }, [organizationId]);
 
   const sendInvite = async () => {
     setLoading(true);
+    setInviteUrl(null);
 
-    const { error } = await sendOrganizationInvite({ email, organization_id: organizationId, role_id: roleId || null });
+    const { data: token, error } = await sendOrganizationInvite({
+      organization_id: organizationId,
+      email,
+      role_id: roleId || null,
+    });
 
     setLoading(false);
 
@@ -27,40 +36,102 @@ export default function InviteToOrganization({ organizationId }) {
       return;
     }
 
-    alert("Einladung gesendet!");
-    setEmail("");
+    if (token) {
+      const url = `${window.location.origin}/invite?token=${token}`;
+      setInviteUrl(url);
+      setInviteToken(token);
+      setEmail("");
+    }
   };
 
+  // Currently not supported
+  // const handleSendEmail = async () => {
+  //   if (!inviteToken || !email) return;
+  //   
+  //   setSendingEmail(true);
+  //   const { error } = await sendInviteEmail({
+  //     email,
+  //     token: inviteToken,
+  //     type: "organization"
+  //   });
+  //   setSendingEmail(false);
+  //
+  //   if (error) {
+  //     alert("Fehler beim E-Mail-Versand: " + error.message);
+  //   } else {
+  //     alert("Einladungs-E-Mail wurde gesendet!");
+  //   }
+  // };
+
   return (
-    <div className="space-y-3">
-      <h3 className="text-lg font-bold">Mitglied einladen</h3>
+    <div className="space-y-3 glass p-4 rounded-xl">
+      <h3 className="text-lg font-bold">Mitglied einladen (Organization)</h3>
 
-      <input
-        type="email"
-        className="border p-2 rounded w-full"
-        placeholder="E-Mail-Adresse"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+      {!inviteUrl ? (
+        <>
+          <input
+            type="email"
+            className="border p-2 rounded w-full"
+            placeholder="E-Mail-Adresse"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-      <select
-        className="border p-2 rounded w-full"
-        value={roleId}
-        onChange={(e) => setRoleId(e.target.value)}
-      >
-        <option value="">Rolle wählen (optional)</option>
-        {roles.map(r => (
-          <option key={r.id} value={r.id}>{r.name}</option>
-        ))}
-      </select>
+          <select
+            className="border p-2 rounded w-full"
+            value={roleId}
+            onChange={(e) => setRoleId(e.target.value)}
+          >
+            <option value="">Rolle wählen (optional)</option>
+            {roles.map(r => (
+              <option key={r.id} value={r.id}>{r.name}</option>
+            ))}
+          </select>
 
-      <button
-        onClick={sendInvite}
-        disabled={loading}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        {loading ? "Senden..." : "Einladen"}
-      </button>
+          <button
+            onClick={sendInvite}
+            disabled={loading}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            {loading ? "Senden..." : "Einladen"}
+          </button>
+        </>
+      ) : (
+        <div className="bg-[var(--bg-secondary)] p-4 rounded border border-[var(--border)]">
+          <p className="text-[var(--success)] font-semibold mb-2">✓ Einladung erstellt!</p>
+          <p className="text-sm text-[var(--text-secondary)] mb-3">Teile diesen Link mit dem Benutzer:</p>
+          <input
+            type="text"
+            value={inviteUrl}
+            readOnly
+            className="border p-2 rounded w-full bg-[var(--bg-input)] text-[var(--text-primary)] text-xs mb-2"
+          />
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(inviteUrl);
+              alert("Link kopiert!");
+            }}
+            className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+          >
+            Link kopieren
+          </button>
+          {/* Currently not supported
+          <button
+            onClick={handleSendEmail}
+            disabled={sendingEmail}
+            className="ml-2 bg-blue-600 text-white px-3 py-1 rounded text-sm"
+          >
+            {sendingEmail ? "Sende..." : "E-Mail senden"}
+          </button>
+          */}
+          <button
+            onClick={() => setInviteUrl(null)}
+            className="ml-2 bg-gray-600 text-white px-3 py-1 rounded text-sm"
+          >
+            Neue Einladung
+          </button>
+        </div>
+      )}
     </div>
   );
 }
