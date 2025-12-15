@@ -24,6 +24,13 @@ export async function getPermissions() {
   return { data, error };
 }
 
+// Fetch permissions for the authenticated user
+// Returns: { "organization": { "org-id": ["permission", ...], ... }, "project": {...}, "document": {...} }
+export async function getPermissionsOfUser() {
+  const { data, error } = await supabase.rpc('get_permissions_of_user');
+  return { data, error };
+}
+
 export async function getRolePermissions(role_id) {
   if (!role_id) return { data: [], error: null };
   // Prefer eq for single id, but fallback to in() or per-id fetch if API rejects
@@ -77,4 +84,23 @@ export async function removePermissionFromRole(role_id, permission_id) {
     .eq('permission_id', permission_id)
     .select('role_id, permission_id');
   return { data, error };
+}
+
+// Check a permission for a given scope/id against a permissions map.
+// Expected shapes under permissions[scope][id]:
+// - string[] of permission names
+// - Set of permission names
+// - { permissions: string[] | Set }
+export function hasPermission(permissions, id, scope, permission) {
+  if (!id || !scope || !permission) return false;
+  const scopePerms = permissions?.[scope];
+  if (!scopePerms) return false;
+  const entry = scopePerms[id];
+  if (!entry) return false;
+
+  if (Array.isArray(entry)) return entry.includes(permission);
+  if (entry instanceof Set) return entry.has(permission);
+  if (entry.permissions && Array.isArray(entry.permissions)) return entry.permissions.includes(permission);
+  if (entry.permissions instanceof Set) return entry.permissions.has(permission);
+  return false;
 }

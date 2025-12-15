@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useProfile, useOrganizations } from '../hooks';
 import { useAuthSession } from '../hooks/useAuthSession';
+import { hasPermission as hasPermissionUtil, getPermissionsOfUser } from '@/shared/lib/rolesQueries';
 import AppDataContext from './AppDataContextBase';
 
 export default function AppDataProvider({ children }) {
@@ -42,17 +43,25 @@ export default function AppDataProvider({ children }) {
     if (user) loadOrganizations();
   }, [user, loadOrganizations]);
 
-  // Optional: derive permissions from profile or organizations
+  // Load permissions from get_permissions_of_user() RPC
   useEffect(() => {
-    if (user && organizations) {
-      // Beispiel: setPermissions aus den Rollen der Org-Mitgliedschaften
-      const perms = {};
-      organizations.forEach(org => {
-        if (org.role) perms[org.id] = org.role; // simple example
-      });
-      setPermissions(perms);
+    if (!user) {
+      setPermissions({});
+      return;
     }
-  }, [user, organizations]);
+
+    const loadPermissions = async () => {
+      const { data, error } = await getPermissionsOfUser();
+      if (error) {
+        console.error('Error loading permissions:', error);
+        setPermissions({});
+      } else {
+        setPermissions(data || {});
+      }
+    };
+
+    loadPermissions();
+  }, [user]);
 
   const value = useMemo(() => ({
     // state
@@ -63,6 +72,7 @@ export default function AppDataProvider({ children }) {
     permissions,
     loading,
     error,
+    hasPermission: (id, scope, permission) => hasPermissionUtil(permissions, id, scope, permission),
     // actions
     loadOrganizations,
     addOrganization,
