@@ -6,6 +6,7 @@ import { OrganizationsList } from './BackendTesting/OrganizationsList';
 import { ProjectCreationForm } from './BackendTesting/ProjectCreationForm';
 import { ProjectsList } from './BackendTesting/ProjectsList';
 import { MembersManagement } from './BackendTesting/MembersManagement';
+import { RolesManagement } from './BackendTesting/RolesManagement';
 import { ProfileTesting } from './BackendTesting/ProfileTesting';
 import DocumentsTesting from './DocumentsTesting';
 import DocumentVersionsTesting from './DocumentVersionsTesting';
@@ -50,6 +51,7 @@ export const BackendTesting = () => {
         projects: false,
         projectsList: false,
         members: false,
+        roles: false,
         profile: false,
     });
 
@@ -124,6 +126,13 @@ export const BackendTesting = () => {
 
                 <CollapsibleSection title="Mitglieder" section="members">
                     <MembersManagement 
+                        organizations={organizations} 
+                        loading={loading} 
+                    />
+                </CollapsibleSection>
+
+                <CollapsibleSection title="Rollen" section="roles">
+                    <RolesManagement 
                         organizations={organizations} 
                         loading={loading} 
                     />

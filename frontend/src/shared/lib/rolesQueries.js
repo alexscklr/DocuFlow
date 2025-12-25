@@ -1,14 +1,44 @@
 import supabase from '@/services/supabaseClient';
 
-export async function getRoles({ scope = 'organization', organization_id = null, project_id = null } = {}) {
+export async function getRoles({ scope = 'organization', organization_id = null, project_id = null} = {}) {
   let query = supabase.from('roles').select('*');
-  if (scope === 'organization' && organization_id) query = query.eq('organization_id', organization_id);
-  if (scope === 'project' && project_id) query = query.eq('project_id', project_id);
+  
+  // Filter by scope first
+  if (scope) query = query.eq('scope', scope);
+  
+  // Then filter by relevant ID based on scope
+  if (scope === 'organization') {
+    if (organization_id) {
+      query = query.eq('organization_id', organization_id);
+    } else {
+      // Don't return template roles (with NULL organization_id) unless explicitly requested
+      return { data: [], error: null };
+    }
+  }
+  
+  if (scope === 'project') {
+    if (project_id) {
+      query = query.eq('project_id', project_id);
+    } else {
+      // Don't return template roles (with NULL project_id) unless explicitly requested
+      return { data: [], error: null };
+    }
+  }
+  
+  if (scope === 'document') {
+    if (project_id) {
+      query = query.eq('project_id', project_id);
+    } else {
+      // Don't return template roles (with NULL project_id) unless explicitly requested
+      return { data: [], error: null };
+    }
+  }
+  
   const { data, error } = await query;
   return { data, error };
 }
 
-export async function addRole({ name, description = null, scope = 'organization', organization_id = null, project_id = null }) {
+export async function addRole({ name, description = null, scope = 'organization', organization_id = null, project_id = null}) {
   const payload = { name, description, scope, organization_id, project_id };
   const { data, error } = await supabase.from('roles').insert([payload]).select().maybeSingle();
   return { data, error };

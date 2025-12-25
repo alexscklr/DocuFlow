@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getRoles, addRole, deleteRole, getPermissions, getRolePermissions, addPermissionToRole, removePermissionFromRole } from '@/shared/lib/rolesQueries';
 
-export default function RolesManager({ scope = 'organization', organizationId = null, projectId = null }) {
+export default function RolesManager({ scope = 'organization', organizationId = null, projectId = null, documentId = null }) {
   const [roles, setRoles] = useState([]);
   const [permissions, setPermissions] = useState([]);
   const permissionsMap = Object.fromEntries(permissions.map(p => [p.id, p]));
@@ -15,13 +15,13 @@ export default function RolesManager({ scope = 'organization', organizationId = 
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data: r, error: er } = await getRoles({ scope, organization_id: organizationId, project_id: projectId });
+    const { data: r, error: er } = await getRoles({ scope, organization_id: organizationId, project_id: projectId, document_id: documentId });
     const { data: p, error: ep } = await getPermissions();
     setRoles(r || []);
     setPermissions(p || []);
     setError(er || ep || null);
     setLoading(false);
-  }, [scope, organizationId, projectId]);
+  }, [scope, organizationId, projectId, documentId]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -42,7 +42,7 @@ export default function RolesManager({ scope = 'organization', organizationId = 
 
   const createRole = async () => {
     if (!newRole.name.trim()) return;
-    const { data, error } = await addRole({ name: newRole.name, description: newRole.description, scope, organization_id: organizationId, project_id: projectId });
+    const { data, error } = await addRole({ name: newRole.name, description: newRole.description, scope, organization_id: organizationId, project_id: projectId, document_id: documentId });
     if (!error && data) {
       setRoles(prev => [...prev, data]);
       setNewRole({ name: '', description: '' });

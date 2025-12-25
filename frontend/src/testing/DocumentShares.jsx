@@ -5,19 +5,19 @@ import { getRoles } from '@/shared/lib/rolesQueries';
 
 export default function DocumentShares({ documentId, projectId }) {
   const { shares, loading, error, loadShares, addShare, removeShare } = useDocumentShares(documentId);
-  const { members } = useProjectMembers(projectId);
+  const { members, loadMembers, error: membersError } = useProjectMembers(projectId);
   const [roles, setRoles] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [selectedRoleId, setSelectedRoleId] = useState('');
   const [sharing, setSharing] = useState(false);
 
-  // Load roles
+  // Load document roles (document-scoped roles are managed at project level)
   useEffect(() => {
-    const loadRoles = async () => {
-      const { data } = await getRoles({ scope: 'project', project_id: projectId });
+    const loadDocumentRoles = async () => {
+      const { data } = await getRoles({ scope: 'document', project_id: projectId });
       setRoles(data || []);
     };
-    if (projectId) loadRoles();
+    if (projectId) loadDocumentRoles();
   }, [projectId]);
 
   // Load shares on mount or when documentId changes
@@ -26,6 +26,13 @@ export default function DocumentShares({ documentId, projectId }) {
       loadShares();
     }
   }, [documentId, loadShares]);
+
+  // Load project members when projectId changes
+  useEffect(() => {
+    if (projectId) {
+      loadMembers();
+    }
+  }, [projectId, loadMembers]);
 
   const handleShare = async () => {
     if (!selectedUserId) return;
@@ -57,6 +64,14 @@ export default function DocumentShares({ documentId, projectId }) {
 
       {error && (
         <div className="text-red-500 text-sm">{error.message || String(error)}</div>
+      )}
+
+      {membersError && (
+        <div className="text-red-500 text-sm">Fehler beim Laden der Projektmitglieder: {membersError.message || String(membersError)}</div>
+      )}
+
+      {members.length === 0 && !membersError && (
+        <div className="text-amber-600 text-sm">Keine Projektmitglieder gefunden. Möglicherweise benötigst du Permissions um diese zu sehen.</div>
       )}
 
       {/* Share form */}

@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useProjects } from '@/shared/hooks/useProjects';
 import { useAuthSession } from '@/shared/hooks/useAuthSession';
-import OrganizationMembers from '@/testing/OrganizationMembers/OrganizationMembers.jsx';
-import ProjectMembers from '@/testing/ProjectMembers/ProjectMembers.jsx';
-import InviteToOrganization from '@/testing/InviteToOrganization.jsx';
-import InviteToProject from '@/testing/InviteToProject.jsx';
+import RolesManager from '@/testing/RolesManager.jsx';
 
-export function MembersManagement({ organizations, loading }) {
+export function RolesManagement({ organizations, loading }) {
   const [selectedOrgId, setSelectedOrgId] = useState(null);
   const { user } = useAuthSession();
   
@@ -28,7 +25,7 @@ export function MembersManagement({ organizations, loading }) {
 
   return (
     <section className="glass p-6 w-stretch flex flex-col gap-6">
-      <h2 className="text-xl font-semibold">Members Verwaltung</h2>
+      <h2 className="text-xl font-semibold">Rollen Verwaltung</h2>
       
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap gap-4 items-end">
@@ -82,22 +79,31 @@ export function MembersManagement({ organizations, loading }) {
           )}
         </div>
 
-        {/* Organization-specific sections */}
+        {/* Organization Roles */}
         {selectedOrgId && (
-          <div className="flex flex-col gap-4">
-            <OrganizationMembers organizationId={selectedOrgId} />
-            <InviteToOrganization organizationId={selectedOrgId} />
+          <div>
+            <RolesManager scope="organization" organizationId={selectedOrgId} />
           </div>
         )}
 
-        {/* Project sections - available with or without org selection */}
+        {/* Project Roles */}
         {selectedProjectId && (
-          <div className="flex flex-col gap-4">
-            <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded text-sm">
-              ℹ️ Projektmitglieder können nur mit entsprechenden Permissions gelesen/bearbeitet werden
-            </div>
-            <ProjectMembers projectId={selectedProjectId} />
-            <InviteToProject projectId={selectedProjectId} />
+          <div>
+            <RolesManager scope="project" projectId={selectedProjectId} />
+          </div>
+        )}
+
+        {/* Document Roles - per Project */}
+        {selectedProjectId && (
+          <div>
+            <RolesManager scope="document" projectId={selectedProjectId} />
+          </div>
+        )}
+
+        {/* No selection message */}
+        {!selectedOrgId && !selectedProjectId && (
+          <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded text-sm text-[var(--text-secondary)]">
+            Wähle eine Organization oder ein Projekt, um deren Rollen zu verwalten
           </div>
         )}
       </div>
