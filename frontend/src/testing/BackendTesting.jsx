@@ -1,5 +1,5 @@
 import { useAppData } from '@/shared/context/AppDataContextBase';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ProjectsPage from '../pages/projects/ProjectsPage';
 import { OrganizationCreationForm } from './BackendTesting/OrganizationCreationForm';
 import { OrganizationsList } from './BackendTesting/OrganizationsList';
@@ -7,6 +7,8 @@ import { ProjectCreationForm } from './BackendTesting/ProjectCreationForm';
 import { ProjectsList } from './BackendTesting/ProjectsList';
 import { MembersManagement } from './BackendTesting/MembersManagement';
 import { ProfileTesting } from './BackendTesting/ProfileTesting';
+import DocumentsTesting from './DocumentsTesting';
+import DocumentVersionsTesting from './DocumentVersionsTesting';
 
 export const BackendTesting = () => {
     const {
@@ -20,13 +22,35 @@ export const BackendTesting = () => {
         loadOrganizations,
     } = useAppData();
 
+    // Shared testing states
+    const [organizationId, setOrganizationId] = useState('');
+    const [projectId, setProjectId] = useState('');
+    const [documentId, setDocumentId] = useState('');
+    const scrollPositionRef = useRef(0);
+
+    // Save scroll position before state updates
+    useEffect(() => {
+        const handleScroll = () => {
+            scrollPositionRef.current = window.scrollY;
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Restore scroll position after state updates
+    useEffect(() => {
+        if (scrollPositionRef.current > 0) {
+            window.scrollTo(0, scrollPositionRef.current);
+        }
+    }, [organizationId, projectId, documentId]);
+
     const [expandedSections, setExpandedSections] = useState({
-        organizations: true,
-        organizationsList: true,
-        projects: true,
-        projectsList: true,
-        members: true,
-        profile: true,
+        organizations: false,
+        organizationsList: false,
+        projects: false,
+        projectsList: false,
+        members: false,
+        profile: false,
     });
 
     const toggleSection = (section) => {
@@ -39,6 +63,7 @@ export const BackendTesting = () => {
     const CollapsibleSection = ({ title, section, children }) => (
         <div className="border border-[var(--border)] rounded-lg overflow-hidden">
             <button
+                type="button"
                 onClick={() => toggleSection(section)}
                 className="w-full flex items-center justify-between bg-[var(--bg-secondary)] p-4 hover:bg-[var(--bg-tertiary)] transition-colors"
             >
@@ -57,7 +82,7 @@ export const BackendTesting = () => {
 
     return (
         <div className="glass min-h-screen w-full flex flex-col items-center justify-start py-8 gap-6">
-            <div className="w-4/5 flex flex-col gap-6">
+            <div className="w-4/5 flex flex-col gap-20">
                 <h1 className="text-3xl font-bold mb-8">Testing Page</h1>
 
                 <CollapsibleSection title="Organization erstellen" section="organizations">
@@ -95,6 +120,8 @@ export const BackendTesting = () => {
                     />
                 </CollapsibleSection>
 
+                <hr className='w-full'/>
+
                 <CollapsibleSection title="Mitglieder" section="members">
                     <MembersManagement 
                         organizations={organizations} 
@@ -102,8 +129,30 @@ export const BackendTesting = () => {
                     />
                 </CollapsibleSection>
 
+                <hr className='w-full'/>
+
                 <CollapsibleSection title="Profil" section="profile">
                     <ProfileTesting user={user} />
+                </CollapsibleSection>
+
+                <hr className='w-full'/>
+
+                <CollapsibleSection title="Dokumente (Projekt)" section="documents">
+                    <DocumentsTesting 
+                        projectId={projectId}
+                        setProjectId={setProjectId}
+                    />
+                </CollapsibleSection>
+
+                <CollapsibleSection title="Dokument-Versionen" section="documentVersions">
+                    <DocumentVersionsTesting 
+                        organizationId={organizationId}
+                        setOrganizationId={setOrganizationId}
+                        projectId={projectId}
+                        setProjectId={setProjectId}
+                        documentId={documentId}
+                        setDocumentId={setDocumentId}
+                    />
                 </CollapsibleSection>
             </div>
         </div>

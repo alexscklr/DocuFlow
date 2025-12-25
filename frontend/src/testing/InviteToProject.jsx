@@ -31,9 +31,9 @@ export default function InviteToProject({ projectId }) {
       alert("Fehler: " + error.message);
       return;
     }
-
+    
     if (token) {
-      const url = `${window.location.origin}/invite?token=${token}`;
+    const url = `${window.location.origin}/invite?token=${token}`;
       setInviteUrl(url);
       //setInviteToken(token);
       setEmail("");
