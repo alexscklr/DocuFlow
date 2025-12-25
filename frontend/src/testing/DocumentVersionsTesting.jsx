@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useDocumentVersions } from '@/shared/hooks/useDocumentVersions';
 import { useDocuments } from '@/shared/hooks/useDocuments';
 import { useProjects } from '@/shared/hooks/useProjects';
+import { useDocumentStatuses } from '@/shared/hooks/useDocumentStatuses';
 import { useAppData } from '@/shared/context/AppDataContextBase';
 import { useAuthSession } from '@/shared/hooks/useAuthSession';
 import { OrganizationSelector, ProjectSelector, DocumentSelector } from './components';
@@ -20,7 +21,8 @@ export default function DocumentVersionsTesting({
   const { user } = useAuthSession();
 
   const { versions, loading, error, loadVersions, uploadAndCreateVersion, loadComments, addComment, downloadFile, removeOldVersions, revertToVersion } = useDocumentVersions(documentId);
-  const { documents, loadDocuments } = useDocuments(projectId);
+    const { documents, loadDocuments, editDocument } = useDocuments(projectId);
+  const { statuses, loadStatuses } = useDocumentStatuses(projectId);
   
   // Use useProjects with organizationId if set, otherwise load all user projects
   const { projects, loadProjects: loadProjectsForOrg } = useProjects(
@@ -54,6 +56,13 @@ export default function DocumentVersionsTesting({
       loadedOrgRef.current = null;
     }
   }, [organizationId, loadProjectsForOrg]);
+
+  // Load statuses when project changes
+  useEffect(() => {
+    if (projectId) {
+      loadStatuses();
+    }
+  }, [projectId, loadStatuses]);
 
   const rememberDocId = useCallback((id) => {
     if (!id) return;
@@ -114,6 +123,24 @@ export default function DocumentVersionsTesting({
     }
   }, [downloadFile]);
 
+    // Get current document
+    const currentDocument = documents.find(d => d.id === documentId);
+
+    // Get current status info
+    const currentStatus = currentDocument?.status_id 
+      ? statuses.find(s => s.id === currentDocument.status_id)
+      : null;
+
+    const handleStatusChange = useCallback(async (statusId) => {
+      if (!documentId) return;
+      const { error } = await editDocument(documentId, { status_id: statusId });
+      if (error) {
+        alert('Fehler beim Ändern des Status: ' + (error.message || String(error)));
+      } else {
+        alert('Status aktualisiert');
+      }
+    }, [documentId, editDocument]);
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-2 items-end">
@@ -140,6 +167,73 @@ export default function DocumentVersionsTesting({
         inputValue={documentId}
         onInputChange={setDocumentId}
       />
+
+      {documentId && currentDocument && (
+        <div className="border rounded p-3 bg-[var(--bg-secondary)]">
+          <h3 className="font-medium mb-2">Dokumentstatus</h3>
+          {statuses.length > 0 ? (
+            <div className="space-y-3">
+              {/* Aktueller Status */}
+              <div>
+                <span className="text-[var(--text-secondary)] text-sm">Aktueller Status:</span>
+                <div className="mt-1 flex items-center gap-2">
+                  {currentStatus ? (
+                    <>
+                      {currentStatus.icon_url && <img src={currentStatus.icon_url} alt={currentStatus.name} className="w-5 h-5" />}
+                      <span
+                        className="inline-block w-5 h-5 rounded"
+                        style={{ backgroundColor: currentStatus.color || '#cccccc' }}
+                      />
+                      <span className="font-medium">{currentStatus.name}</span>
+                    </>
+                  ) : (
+                    <span className="text-[var(--text-secondary)] text-sm">Kein Status zugeordnet</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Status Selector */}
+              <div>
+                <span className="text-[var(--text-secondary)] text-sm">Status wechseln:</span>
+                <div className="mt-1 grid grid-cols-2 gap-2">
+                  {statuses.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => handleStatusChange(s.id)}
+                      className={`flex items-center gap-2 p-2 rounded border transition-colors ${
+                        currentStatus?.id === s.id
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      {s.icon_url && <img src={s.icon_url} alt={s.name} className="w-4 h-4" />}
+                      <span
+                        className="inline-block w-3 h-3 rounded flex-shrink-0"
+                        style={{ backgroundColor: s.color || '#cccccc' }}
+                      />
+                      <span className="text-sm">{s.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Clear Status Button */}
+              {currentStatus && (
+                <button
+                  type="button"
+                  onClick={() => handleStatusChange(null)}
+                  className="text-sm text-red-600 hover:text-red-700"
+                >
+                  Status entfernen
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="text-sm text-[var(--text-secondary)]">Keine Statusse für dieses Projekt erstellt</div>
+          )}
+        </div>
+      )}
       <div className="flex gap-2">
         <button type="button" onClick={loadVersions} disabled={!documentId || loading} className="glass-btn">
           {loading ? 'Lädt…' : 'Laden'}

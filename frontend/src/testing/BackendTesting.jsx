@@ -10,6 +10,7 @@ import { RolesManagement } from './BackendTesting/RolesManagement';
 import { ProfileTesting } from './BackendTesting/ProfileTesting';
 import DocumentsTesting from './DocumentsTesting';
 import DocumentVersionsTesting from './DocumentVersionsTesting';
+import DocumentStatusManager from './DocumentStatusManager';
 
 export const BackendTesting = () => {
     const {
@@ -52,6 +53,7 @@ export const BackendTesting = () => {
         projectsList: false,
         members: false,
         roles: false,
+        statuses: false,
         profile: false,
     });
 
@@ -135,6 +137,12 @@ export const BackendTesting = () => {
                     <RolesManagement 
                         organizations={organizations} 
                         loading={loading} 
+                    />
+                </CollapsibleSection>
+
+                <CollapsibleSection title="Dokumentstatus" section="statuses">
+                    <DocumentStatusManager 
+                        projectId={projectId}
                     />
                 </CollapsibleSection>
 

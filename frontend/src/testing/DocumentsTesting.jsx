@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDocuments } from '@/shared/hooks/useDocuments';
+import { useDocumentStatuses } from '@/shared/hooks/useDocumentStatuses';
 import { useAppData } from '@/shared/context/AppDataContextBase';
 import { useAuthSession } from '@/shared/hooks/useAuthSession';
 import { useProjects } from '@/shared/hooks/useProjects';
@@ -11,10 +12,20 @@ export default function DocumentsTesting({ projectId, setProjectId }) {
   const { user } = useAuthSession();
   const { projects: allProjects } = useProjects(null, { organizations, userId: user?.id });
   const { documents, loading, error, loadDocuments, addDocument, editDocument, removeDocument } = useDocuments(projectId);
+  const { statuses, loadStatuses } = useDocumentStatuses(projectId);
   const [newTitle, setNewTitle] = useState('');
+  const [newStatusId, setNewStatusId] = useState('');
   const [editingDocId, setEditingDocId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
+  const [editStatusId, setEditStatusId] = useState('');
   const [sharingDocId, setSharingDocId] = useState(null);
+
+  // Load statuses when project changes
+  useEffect(() => {
+    if (projectId) {
+      loadStatuses();
+    }
+  }, [projectId, loadStatuses]);
 
   return (
     <div className="space-y-4">
@@ -40,50 +51,80 @@ export default function DocumentsTesting({ projectId, setProjectId }) {
         </div>
       )}
 
-      <div className="flex gap-2 items-end">
-        <div className="flex-1">
-          <label className="block text-sm mb-1">Neues Dokument</label>
-          <input
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="Titel"
-            className="w-full border p-2 rounded"
-          />
+      <div className="space-y-2">
+        <div className="flex gap-2 items-end">
+          <div className="flex-1">
+            <label className="block text-sm mb-1">Neues Dokument</label>
+            <input
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="Titel"
+              className="w-full border p-2 rounded"
+            />
+          </div>
+          <div className="w-48">
+            <label className="block text-sm mb-1">Status (optional)</label>
+            <select
+              value={newStatusId}
+              onChange={(e) => setNewStatusId(e.target.value)}
+              className="w-full border p-2 rounded"
+            >
+              <option value="">Kein Status</option>
+              {statuses.map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              await addDocument({ title: newTitle, status_id: newStatusId || null });
+              setNewTitle('');
+              setNewStatusId('');
+            }}
+            disabled={!projectId || !newTitle}
+            className="glass-btn"
+          >
+            Erstellen
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={async () => {
-            await addDocument({ title: newTitle });
-            setNewTitle('');
-          }}
-          disabled={!projectId || !newTitle}
-          className="glass-btn"
-        >
-          Erstellen
-        </button>
       </div>
 
       <ul className="space-y-2">
         {documents.map((doc) => (
           <li key={doc.id} className="border rounded p-3">
             {editingDocId === doc.id ? (
-              <div className="flex items-center justify-between">
-                <div className="flex-1 flex gap-2 items-center">
+              <div className="space-y-2">
+                <div className="flex gap-2 items-center">
                   <input
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
                     placeholder="Neuer Titel"
                     className="flex-1 border p-2 rounded"
                   />
+                  <select
+                    value={editStatusId}
+                    onChange={(e) => setEditStatusId(e.target.value)}
+                    className="w-48 border p-2 rounded"
+                  >
+                    <option value="">Kein Status</option>
+                    {statuses.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 justify-end">
                   <button
                     type="button"
                     className="glass-btn"
                     onClick={async () => {
-                      await editDocument(doc.id, { title: editTitle });
+                      await editDocument(doc.id, { 
+                        title: editTitle,
+                        status_id: editStatusId || null 
+                      });
                       setEditingDocId(null);
                       setEditTitle('');
+                      setEditStatusId('');
                     }}
                     disabled={!editTitle}
                   >
@@ -95,6 +136,7 @@ export default function DocumentsTesting({ projectId, setProjectId }) {
                     onClick={() => {
                       setEditingDocId(null);
                       setEditTitle('');
+                      setEditStatusId('');
                     }}
                   >
                     Abbrechen
@@ -103,9 +145,22 @@ export default function DocumentsTesting({ projectId, setProjectId }) {
               </div>
             ) : (
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex-1">
                   <div className="font-medium">{doc.title}</div>
                   <div className="text-xs text-[var(--text-secondary)]">ID: {doc.id}</div>
+                  {doc.status_id && (() => {
+                    const status = statuses.find(s => s.id === doc.status_id);
+                    return status ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        {status.icon_url && <img src={status.icon_url} alt={status.name} className="w-4 h-4" />}
+                        <span
+                          className="inline-block w-3 h-3 rounded"
+                          style={{ backgroundColor: status.color || '#cccccc' }}
+                        />
+                        <span className="text-xs">{status.name}</span>
+                      </div>
+                    ) : null;
+                  })()}
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -114,6 +169,7 @@ export default function DocumentsTesting({ projectId, setProjectId }) {
                     onClick={() => {
                       setEditingDocId(doc.id);
                       setEditTitle(doc.title);
+                      setEditStatusId(doc.status_id || '');
                     }}
                   >
                     Edit
