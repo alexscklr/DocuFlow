@@ -1,52 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAppData } from '@/shared/context/AppDataContextBase';
-
-export const ORGANIZATION_PROJECTS = [
-
-  {
-    id: "org-proj-2",
-    name: "Project name",
-    date: "XX.XX.20XX",
-    description:
-      "Description Description Description Description Description Description Description Description Description",
-  },
-  {
-    id: "org-proj-3",
-    name: "Project name",
-    date: "XX.XX.20XX",
-    description:
-      "Description Description Description Description Description Description Description Description Description",
-  },
-  {
-    id: "org-proj-4",
-    name: "Project name",
-    date: "XX.XX.20XX",
-    description:
-      "Description Description Description Description Description Description Description Description Description",
-  },
-  {
-    id: "org-proj-5",
-    name: "Project name",
-    date: "XX.XX.20XX",
-    description:
-      "Description Description Description Description Description Description Description Description Description",
-  },
-  {
-    id: "org-proj-6",
-    name: "Project name",
-    date: "XX.XX.20XX",
-    description:
-      "Description Description Description Description Description Description Description Description Description",
-  },
-];
+import { OrganizationField } from '@/shared/components';
 
 
 export function OrganizationsPage() {
-  const { addOrganization, updateOrganization, deleteOrganization, loadOrganizations } = useAppData();
+  const { addOrganization, updateOrganization, deleteOrganization, loadOrganizations,organizations } = useAppData();
   const [showForm, setShowForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [organizations, setOrganizations] = useState(ORGANIZATION_PROJECTS);
+  //const [organizations, setOrganizations] = useState(ORGANIZATION_PROJECTS);
   const [formData, setFormData] = useState({ name: '', description: '' });
   const [editingId, setEditingId] = useState(null);
   const [editFormData, setEditFormData] = useState({ name: '', description: '' });
@@ -93,15 +55,7 @@ export function OrganizationsPage() {
       const res = await addOrganization(formData);
       if (res) {
         // Add the new organization to the list
-        setOrganizations(prev => [
-          ...prev,
-          {
-            id: res.id || `org-${Date.now()}`,
-            name: formData.name,
-            date: new Date().toLocaleDateString('de-DE'),
-            description: formData.description
-          }
-        ]);
+        const r = await handleLoadOrganizations();
         // Reset form
         setFormData({ name: '', description: '' });
         setShowForm(false);
@@ -205,7 +159,7 @@ export function OrganizationsPage() {
           space-y-10
         "
       >
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-8">
           <h1 className="text-4xl text-left font-semibold distance-bottom-sm">Organisation</h1>
           <div className="flex items-center gap-2">
             <button
@@ -232,35 +186,12 @@ export function OrganizationsPage() {
         <hr className="border-white/20 distance-bottom-md" />
 
         <section className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-          {organizations.map((project) => (
-            <article
-              key={project.id}
-              className="glass border border-[var(--color-text)]/30 rounded-lg p-4"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <span
-                    onClick={() => handleDeleteClick(project.id)}
-                    className="w-6 h-6 border border-[var(--color-text)] rounded-full flex items-center justify-center text-xs cursor-pointer hover:bg-red-500/30 hover:border-red-500 transition-colors"
-                  >
-                    ✕
-                  </span>
-                  <span>{project.name}</span>
-                </div>
-                <span className="text-xs">{project.date}</span>
-              </div>
-              <p className="text-xs leading-relaxed text-[var(--color-text)]/80 mb-4">
-                {project.description}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleEditClick(project)}
-                  className="flex-1 px-3 py-2 text-xs border border-[var(--color-text)]/30 rounded hover:bg-[var(--color-text)]/10 transition-colors"
-                >
-                  Edit
-                </button>
-              </div>
-            </article>
+          {organizations.map((organization) => (
+            <OrganizationField
+              organizationName={organization.name}
+              description={organization.description}
+              date={organization.date}
+            />
           ))}
         </section>
 
