@@ -19,6 +19,23 @@ export const getProjectsByOrganization = async (organizationId) => {
     return { data, error };
 }
 
+// Fetch projects where the given user is a project member (external or internal)
+export const getProjectsByUserMembership = async (userId) => {
+  if (!userId) return { data: [], error: null };
+  const { data, error } = await supabase
+    .from('project_members')
+    .select('projects:project_id(*)')
+    .eq('user_id', userId);
+
+  // Map joined rows to project objects
+  const projects = (data || [])
+    .map((row) => row.projects)
+    .filter(Boolean);
+
+  console.log('getProjectsByUserMembership result:', { count: projects.length, error });
+  return { data: projects, error };
+}
+
 export const updateProject = async (projectId, updates) => {
   const { data, error } = await supabase
     .from('projects')
