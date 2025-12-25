@@ -1,10 +1,19 @@
-export default function OrganizationField({  organizationName, desciption ,date }) {
+export default function OrganizationField({  organizationName, description, date, id }) {
 
-return <div className="border glass rounded-lg p-4">
-   <div className="flex justify-between">
-     <p className="text-2xs distance-bottom-sm text-left text-white">{organizationName}</p>
-     <p className="text-xs distance-bottom-sm text-left text-gray-300">{date}</p>
-   </div>
-      <p className="text-xs distance-bottom-sm text-left text-white">{desciption}</p>
-  </div>
+return (
+    <button className="border glass rounded-lg p-4 text-left" onClick={() => navigate(`/organizations/${id}`)}>
+      <div className="flex justify-between">
+        <p className="text-2xs distance-bottom-sm text-white">
+          {organizationName}
+        </p>
+        <p className="text-xs distance-bottom-sm text-gray-300">
+          {new Date(date).toLocaleDateString()}
+        </p>
+      </div>
+
+      <p className="text-xs distance-bottom-sm text-white">
+        {description}
+      </p>
+    </button>
+  );
 }
