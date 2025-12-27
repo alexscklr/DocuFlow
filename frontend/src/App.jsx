@@ -42,8 +42,8 @@ function App() {
           <Route path="/access" element={<AccessPage />} />
           <Route path="/testing" element={<BackendTesting />} />
           <Route path="/invite" element={<AcceptInvitation />} />
-          <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/organizations" element={<OrganizationsPage />} />
+          <Route path="/organizations/:orgId" element={<ProjectsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Routes>
         {/* Footer */}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAppData } from '@/shared/context/AppDataContextBase';
-import { OrganizationField } from '@/shared/components';
-import { Modal, CreateDialog } from '@/shared/components';
+import { InfoFieldButton } from '@/shared/components';
+import { Modal, EntityFormDialog, ActionButton } from '@/shared/components';
 
 
 export function OrganizationsPage() {
@@ -43,28 +43,30 @@ export function OrganizationsPage() {
       >
         <div className="flex items-center justify-between gap-8">
           <h1 className="text-4xl text-left font-semibold distance-bottom-sm">Organisations</h1>
-            <button onClick={() => setOpen(true)} className="w-8 h-8 border-2 rounded-full text-3xl flex items-center justify-center hover:bg-white/10">
-              +
-            </button>
+          <ActionButton
+            variant="add"
+            onClick={() => setOpen(true)}
+          />
         </div>
 
         <hr className="border-white/20 distance-bottom-md" />
 
         <section className="grid gap-8 grid-cols-2">
           {organizations.map((organization) => (
-            <OrganizationField
+            <InfoFieldButton
               key={organization.id}
               id={organization.id}
-              organizationName={organization.name}
+              title={organization.name}
               description={organization.description}
               date={organization.created_at}
+              to={`/organizations/${organization.id}`}
             />
           ))}
         </section>
 
         <Modal isOpen={open} onClose={() => setOpen(false)}>
-         <CreateDialog
-            title="Create organisation"
+         <EntityFormDialog
+            title="Create Organsiation"
             field1Label="Name"
             field2Label="Description"
             onCancel={() => setOpen(false)}
