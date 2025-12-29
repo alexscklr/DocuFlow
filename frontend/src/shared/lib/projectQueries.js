@@ -55,3 +55,14 @@ export const deleteProject = async (projectId) => {
     .maybeSingle();
   return { data, error };
 }
+
+export const getProjectById = async (projectId) => {
+    const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', projectId)
+        .single();
+
+    console.log("getProjectById result:", { data, error });
+    return { data, error };
+}

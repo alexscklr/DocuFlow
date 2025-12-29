@@ -8,6 +8,7 @@ import { AccessPage } from './pages/Access/AccessPage';
 import { BackendTesting } from './testing/BackendTesting';
 import { ProfilePage } from './pages/Profile/ProfilePage';
 import ProjectsPage from '@/pages/projects/ProjectsPage';
+import ProjectPage from '@/pages/Project/ProjectPage';
 import { OrganizationsPage } from '@/pages/Organizations/OrganizationsPage';
 import AcceptInvitation from './testing/AcceptInvite';
 import Header from './layout/header/Header';
@@ -43,8 +44,9 @@ function App() {
           <Route path="/testing" element={<BackendTesting />} />
           <Route path="/invite" element={<AcceptInvitation />} />
           <Route path="/organizations" element={<OrganizationsPage />} />
-          <Route path="/organizations/:orgId" element={<ProjectsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/organizations/:orgId/projects" element={<ProjectsPage />} />
+          <Route path="/organizations/:orgId/projects/:projectId" element={<ProjectPage />} />
         </Routes>
         {/* Footer */}
       </Router>

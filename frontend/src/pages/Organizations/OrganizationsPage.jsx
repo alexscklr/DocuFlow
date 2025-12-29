@@ -59,7 +59,7 @@ export function OrganizationsPage() {
               title={organization.name}
               description={organization.description}
               date={organization.created_at}
-              to={`/organizations/${organization.id}`}
+              to={`/organizations/${organization.id}/projects`}
             />
           ))}
         </section>

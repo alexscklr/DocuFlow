@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { createProject, updateProject, deleteProject, getProjectsByOrganization, getProjectsByUserMembership } from '@/shared/lib';
+import { createProject, updateProject, deleteProject, getProjectsByOrganization, getProjectsByUserMembership, getProjectById } from '@/shared/lib';
 
 /**
  * useProjects: Hook für Projekt-CRUD und State
@@ -123,6 +123,16 @@ export function useProjects(organizationId, options = {}) {
 		return { data, error };
 	}, []);
 
+	// Projekt erhalten
+	const getProjectByIdHandler = useCallback(async (projectId) => {
+		if (!projectId) {
+			return { data: null, error: null };
+		}
+
+		const { data, error } = await getProjectById(projectId);
+		return { data, error };
+	}, []);
+
 	return {
 		projects,
 		loading,
@@ -131,5 +141,6 @@ export function useProjects(organizationId, options = {}) {
 		addProject: addProjectHandler,
 		updateProject: updateProjectHandler,
 		deleteProject: deleteProjectHandler,
+		getProjectById: getProjectByIdHandler,
 	};
 }

@@ -76,7 +76,7 @@ export default function ProjectsPage() {
               title={project.name}
               description={project.description}
               date={project.created_at}
-              to={`/documents/${project.id}`}
+              to={`/organizations/${org.id}/projects/${project.id}`}
           />
           ))}
         </section>
