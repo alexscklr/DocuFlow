@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDocuments } from '@/shared/hooks/useDocuments';
 import { useProjects } from '@/shared/hooks/useProjects';
 import { Modal, EntityFormDialog, ActionButton, ConfirmDeleteDialog } from '@/shared/components';
+import { Table } from '@/shared/components/TableProject/Table';
 
 export default function ProjectPage() {
   const { projectId } = useParams();
@@ -66,8 +67,7 @@ export default function ProjectPage() {
 
         <hr className="border-white/20" />
 
-
-
+        <Table data={[]} />
 
         <Modal isOpen={createOpen} onClose={() => setCreateOpen(false)}>
           <EntityFormDialog
