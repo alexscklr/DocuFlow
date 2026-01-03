@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDocuments } from '@/shared/hooks/useDocuments';
 import { useProjects } from '@/shared/hooks/useProjects';
@@ -15,7 +15,7 @@ export default function ProjectPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { getProjectById, deleteProject, updateProject } = useProjects(projectId);
+  const { getProjectById, deleteProject, updateProject } = useProjects(null);
 
   useEffect(() => {
     async function load() {
@@ -25,39 +25,23 @@ export default function ProjectPage() {
     load();
   }, [projectId, getProjectById]);
 
-  const { documents, addDocument } = useDocuments(projectId);
-  const [localDocuments, setLocalDocuments] = useState([]);
+  const { documents, addDocument, loadDocuments } = useDocuments(projectId);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
+
+  const handleLoadDocuments = useCallback(async () => {
+    setIsLoadingDocuments(true);
+    try {
+      await loadDocuments();
+    } catch (error) {
+      console.error('Error loading documents:', error);
+    } finally {
+      setIsLoadingDocuments(false);
+    }
+  }, [loadDocuments]);
 
   useEffect(() => {
-    if (!documents) return setLocalDocuments([]);
-
-    setLocalDocuments((prev) => {
-      const byKey = new Map();
-      prev.forEach((p) => {
-        if (p.id) byKey.set(p.id, p);
-        if (p.title) byKey.set(`title:${p.title}`, p);
-      });
-
-      const merged = documents.map((d) => {
-        const local = byKey.get(d.id) || byKey.get(`title:${d.title}`) || {};
-        return {
-          ...d,
-          state: local.state ?? d.state ?? '',
-          version: local.version ?? d.version ?? '',
-          date: local.date ?? d.date ?? (d.created_at ? new Date(d.created_at).toLocaleString() : undefined),
-        };
-      });
-
-      // include any local-only items that don't exist on server yet
-      const serverKeys = new Set(merged.map((m) => (m.id ? m.id : `title:${m.title}`)));
-      const localsNotOnServer = prev.filter((p) => {
-        const key = p.id ? p.id : `title:${p.title}`;
-        return !serverKeys.has(key);
-      });
-
-      return [...localsNotOnServer, ...merged];
-    });
-  }, [documents]);
+    handleLoadDocuments();
+  }, []);
 
   if (!project) {
     return (
@@ -100,7 +84,7 @@ export default function ProjectPage() {
         <hr className="border-white/20 distance-bottom-md" />
 
         <section>
-          <Table data={localDocuments} />
+          <Table data={documents} />
         </section>
 
         <Modal isOpen={createOpen} onClose={() => setCreateOpen(false)}>
@@ -109,42 +93,13 @@ export default function ProjectPage() {
             submitLabel="Create"
             onCancel={() => setCreateOpen(false)}
             onSubmit={async (data) => {
-              // create a temporary local row so table updates immediately
-              const tempId = `tmp-${Date.now()}`;
-              const tempDoc = {
-                id: tempId,
+              await addDocument({
                 title: data.title,
-                state: data.state,
-                version: data.version,
-                date: data.date ?? new Date().toLocaleString(),
-              };
-
-              setLocalDocuments((prev) => [tempDoc, ...prev]);
-
-              // persist to server
-              const { data: created, error } = await addDocument({ title: data.title, status_id: null });
-
-              const serverDoc = created ?? null;
-
-              // replace temp entry with server record (preserve state/version/date)
-              setLocalDocuments((prev) => {
-                return prev.map((p) => {
-                  if (p.id !== tempId) return p;
-
-                  const merged = {
-                    ...(serverDoc || {}),
-                    id: serverDoc?.id ?? tempId,
-                    title: serverDoc?.title ?? data.title,
-                    state: data.state,
-                    version: data.version,
-                    date:
-                      data.date ?? (serverDoc?.created_at ? new Date(serverDoc.created_at).toLocaleString() : new Date().toLocaleString()),
-                  };
-
-                  return merged;
-                });
+                status_id: "7c68e50a-d6cd-4439-afcd-17380c2a4cb6",
+                created_at: new Date().toLocaleString(),
+                current_version_id: null,
               });
-
+              await handleLoadDocuments();
               setCreateOpen(false);
             }}
           />
