@@ -46,7 +46,11 @@ export default function DocumentVersionsTesting({
     setComments(data || []);
   };
 
-  // Load projects when organization changes, or load all user projects when no org selected
+  useEffect(() => {
+    if (projectId) {
+      loadStatuses();
+    }
+  }, [projectId, loadStatuses]);
   useEffect(() => {
     if (organizationId && loadedOrgRef.current !== organizationId) {
       loadProjectsForOrg();

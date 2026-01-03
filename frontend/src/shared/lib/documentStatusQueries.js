@@ -1,12 +1,23 @@
 import supabase from '@/services/supabaseClient';
 
-// Get all document statuses for a project
+// Get all document statuses for a project, including template statuses (project_id = null)
 export async function getDocumentStatuses(projectId) {
   const { data, error } = await supabase
     .from('document_statuses')
     .select('*')
-    .eq('project_id', projectId)
+    .or(`project_id.eq.${projectId},project_id.is.null`)
     .order('name');
+  return { data, error };
+}
+
+// Get only template statuses (project_id = null)
+export async function getTemplateStatuses() {
+  const { data, error } = await supabase
+    .from('document_statuses')
+    .select('*')
+    .filter('project_id', 'is', null)
+    .order('name');
+    console.log('Template statuses loaded:', data);
   return { data, error };
 }
 

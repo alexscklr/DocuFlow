@@ -195,7 +195,7 @@ export default function DocumentStatusManager({ projectId: externalProjectId }) 
               </div>
             )}
 
-            {/* Liste der Statusse */}
+            {/* Liste der Statuses */}
             {loading ? (
               <div className="text-sm text-[var(--text-secondary)]">Lädt...</div>
             ) : statuses.length > 0 ? (
@@ -219,25 +219,29 @@ export default function DocumentStatusManager({ projectId: externalProjectId }) 
                         <div>
                           <div className="font-medium">{status.name}</div>
                           <div className="text-xs text-[var(--text-secondary)]">
-                            {status.color} {status.icon_url ? '• Icon vorhanden' : ''}
+                            {status.project_id === null ? 'Template' : 'Projekt'} {status.color ? '• ' + status.color : ''} {status.icon_url ? '• Icon vorhanden' : ''}
                           </div>
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => startEdit(status)}
-                          className="glass-btn text-sm"
-                        >
-                          Bearbeiten
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(status.id)}
-                          className="glass-btn text-sm bg-red-600 hover:bg-red-700 text-white"
-                        >
-                          Löschen
-                        </button>
+                        {status.project_id !== null && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => startEdit(status)}
+                              className="glass-btn text-sm"
+                            >
+                              Bearbeiten
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(status.id)}
+                              className="glass-btn text-sm bg-red-600 hover:bg-red-700 text-white"
+                            >
+                              Löschen
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </li>
@@ -245,7 +249,7 @@ export default function DocumentStatusManager({ projectId: externalProjectId }) 
               </ul>
             ) : (
               <div className="text-sm text-[var(--text-secondary)]">
-                Noch keine Statusse für dieses Projekt erstellt
+                Noch keine Statuses für dieses Projekt erstellt
               </div>
             )}
           </>

@@ -1,21 +1,38 @@
 import { useState, useCallback } from 'react';
-import { getDocumentStatuses, createDocumentStatus, updateDocumentStatus, deleteDocumentStatus } from '@/shared/lib/documentStatusQueries';
+import { getDocumentStatuses, getTemplateStatuses, createDocumentStatus, updateDocumentStatus, deleteDocumentStatus } from '@/shared/lib/documentStatusQueries';
 
 export function useDocumentStatuses(projectId) {
   const [statuses, setStatuses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Load document statuses for project
+  // Load document statuses for project (including template statuses)
   const loadStatuses = useCallback(async () => {
-    if (!projectId) return { data: [], error: null };
     setLoading(true);
     setError(null);
-    const { data, error: err } = await getDocumentStatuses(projectId);
-    if (!err) setStatuses(data ?? []);
-    setError(err);
+    
+    // Immer Template-Statuses laden
+    const { data: templateData, error: templateErr } = await getTemplateStatuses();
+    let projectData = [];
+    let projectErr = null;
+    
+    // Wenn projectId vorhanden ist, auch Projekt-Statuses laden
+    if (projectId) {
+      const result = await getDocumentStatuses(projectId);
+      projectData = (result.data ?? []).filter(s => s.project_id !== null);
+      projectErr = result.error;
+    }
+    
+    if (!templateErr && !projectErr) {
+      setStatuses([...projectData, ...templateData]);
+    } else {
+      setError(templateErr || projectErr);
+    }
     setLoading(false);
-    return { data, error: err };
+
+    console.log('Loaded statuses:', [...projectData, ...templateData]);
+
+    return { data: [...projectData, ...templateData], error: templateErr || projectErr };
   }, [projectId]);
 
   // Create new status
