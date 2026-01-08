@@ -2,6 +2,8 @@ const ICONS = {
   add: '+',
   edit: '✎',
   delete: 'x',
+  upload: '↑',
+  download: '↓',
 };
 
 const STYLES = {
@@ -17,6 +19,8 @@ const STYLES = {
   add: 'hover:bg-white/10',
   edit: 'hover:bg-blue-500/10',
   delete: 'hover:bg-red-500/10',
+  upload: 'hover:bg-green-500/10',
+  download: 'hover:bg-blue-500/10',
 };
 
 export default function ActionButton({

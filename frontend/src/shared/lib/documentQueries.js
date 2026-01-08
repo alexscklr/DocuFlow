@@ -37,3 +37,23 @@ export async function deleteDocument(documentId) {
 
     return { error };
 }
+
+// Get all documents (not filtered by project) with project and organization info
+export async function getAllDocuments() {
+    const { data, error } = await supabase
+        .from('documents')
+        .select(`
+            *,
+            project:projects(
+                id,
+                name,
+                organization_id,
+                organization:organizations(
+                    id,
+                    name
+                )
+            )
+        `)
+        .order('created_at', { ascending: false });
+    return { data, error };
+}

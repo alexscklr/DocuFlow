@@ -12,6 +12,8 @@ export default function Main() {
             <Button icon={reactLogo} label="Login / Signup" slug="/access" />
             <Button icon={viteLogo} label="ProfilePage" slug="/profile" />
             <Button icon={reactLogo} label="Organizations" slug="/organizations" />
+            <Button icon={viteLogo} label="Members" slug="/members" />
+            <Button icon={reactLogo} label="Documents" slug="/documents" />
         </main>
     )
 }
