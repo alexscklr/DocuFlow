@@ -2,11 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDocuments } from '@/shared/hooks/useDocuments';
 import { useProjects } from '@/shared/hooks/useProjects';
-import { useDocumentVersions } from '@/shared/hooks/useDocumentVersions';
 import { useDocumentStatuses } from '@/shared/hooks/useDocumentStatuses';
-import { Modal, EntityFormDialog, DokumentFormDialog, ActionButton, ConfirmDeleteDialog, DocumentsUploadDialog } from '@/shared/components';
+import { Modal, EntityFormDialog, DokumentFormDialog, ActionButton, ConfirmDeleteDialog } from '@/shared/components';
 import { Table } from '@/shared/components/TableProject/Table';
-import { uploadDocumentFile, createDocumentVersion, downloadVersionFile } from '@/shared/lib/documentVersionsQueries';
 
 export default function ProjectPage() {
   const { projectId } = useParams();
@@ -17,11 +15,6 @@ export default function ProjectPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [uploadOpen, setUploadOpen] = useState(false);
-  const [downloadOpen, setDownloadOpen] = useState(false);
-  const [selectedDocumentId, setSelectedDocumentId] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [downloading, setDownloading] = useState(false);
 
   const { getProjectById, deleteProject, updateProject } = useProjects(null);
 
@@ -36,9 +29,6 @@ export default function ProjectPage() {
   const { documents, addDocument, loadDocuments } = useDocuments(projectId);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
   const { statuses } = useDocumentStatuses(projectId);
-  
-  // Get versions for selected document (for download)
-  const { versions, loadVersions } = useDocumentVersions(selectedDocumentId);
   
   // Load versions for all documents to get version numbers
   const [documentVersionsMap, setDocumentVersionsMap] = useState({});
@@ -78,13 +68,6 @@ export default function ProjectPage() {
     handleLoadDocuments();
   }, []);
 
-  // Load versions when document is selected for download
-  useEffect(() => {
-    if (selectedDocumentId && downloadOpen) {
-      loadVersions();
-    }
-  }, [selectedDocumentId, downloadOpen, loadVersions]);
-
   // Format documents for Table component
   const formattedDocuments = documents.map((doc) => {
     // Get status name
@@ -107,83 +90,6 @@ export default function ProjectPage() {
     };
   });
 
-  const handleUpload = async ({ documentId, file, changeNote }) => {
-    if (!project || !project.organization_id) {
-      alert('Project must be associated with an organization');
-      return;
-    }
-
-    setUploading(true);
-    try {
-      // Upload file to storage
-      const filePath = await uploadDocumentFile({
-        organizationId: project.organization_id,
-        projectId: project.id,
-        documentId,
-        file
-      });
-
-      // Create document version
-      await createDocumentVersion({
-        documentId,
-        filePath,
-        changeNote: changeNote || 'Uploaded via Project page'
-      });
-
-      alert('File uploaded successfully!');
-      setUploadOpen(false);
-      setSelectedDocumentId(null);
-      await handleLoadDocuments();
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      alert(`Error uploading file: ${error.message || error}`);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleDownload = async ({ documentId }) => {
-    if (!versions || versions.length === 0) {
-      alert('No versions available for this document');
-      return;
-    }
-
-    const latestVersion = versions[0]; // Versions are ordered by version_number descending
-    if (!latestVersion.file_url) {
-      alert('No file available for this document version');
-      return;
-    }
-
-    setDownloading(true);
-    try {
-      const { data: blob, error } = await downloadVersionFile(latestVersion.file_url);
-      
-      if (error) throw error;
-
-      if (blob) {
-        // Create download link
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const fileName = latestVersion.file_url.split('/').pop() || `document-${documentId}`;
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        alert('File downloaded successfully!');
-      }
-      
-      setDownloadOpen(false);
-      setSelectedDocumentId(null);
-      await handleLoadDocuments();
-    } catch (error) {
-      console.error('Error downloading file:', error);
-      alert(`Error downloading file: ${error.message || error}`);
-    } finally {
-      setDownloading(false);
-    }
-  };
 
   if (!project) {
     return (
@@ -217,8 +123,6 @@ export default function ProjectPage() {
           </div>
 
           <div className="flex gap-4 shrink-0 self-end distance-bottom-xs">
-            <ActionButton variant="upload" onClick={() => setUploadOpen(true)} />
-            <ActionButton variant="download" onClick={() => setDownloadOpen(true)} />
             <ActionButton variant="delete" onClick={() => setDeleteOpen(true)} />
             <ActionButton variant="edit" onClick={() => setEditOpen(true)} />
             <ActionButton variant="add" onClick={() => setCreateOpen(true)} />
@@ -288,46 +192,6 @@ export default function ProjectPage() {
 
               setEditOpen(false);
             }}
-          />
-        </Modal>
-
-        <Modal isOpen={uploadOpen} onClose={() => {
-          setUploadOpen(false);
-          setSelectedDocumentId(null);
-        }}>
-          <DocumentsUploadDialog
-            title="Upload Document"
-            mode="upload"
-            documents={documents}
-            selectedDocumentId={selectedDocumentId}
-            onDocumentSelect={setSelectedDocumentId}
-            onSubmit={handleUpload}
-            onCancel={() => {
-              setUploadOpen(false);
-              setSelectedDocumentId(null);
-            }}
-            submitLabel="Upload"
-            loading={uploading}
-          />
-        </Modal>
-
-        <Modal isOpen={downloadOpen} onClose={() => {
-          setDownloadOpen(false);
-          setSelectedDocumentId(null);
-        }}>
-          <DocumentsUploadDialog
-            title="Download Document"
-            mode="download"
-            documents={documents}
-            selectedDocumentId={selectedDocumentId}
-            onDocumentSelect={setSelectedDocumentId}
-            onSubmit={handleDownload}
-            onCancel={() => {
-              setDownloadOpen(false);
-              setSelectedDocumentId(null);
-            }}
-            submitLabel="Download"
-            loading={downloading}
           />
         </Modal>
       </div>

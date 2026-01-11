@@ -1,113 +1,89 @@
 import { useState, useEffect, useRef } from 'react';
-import { useAllDocuments } from '@/shared/hooks/useAllDocuments';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useDocuments } from '@/shared/hooks/useDocuments';
 import { useDocumentVersions } from '@/shared/hooks/useDocumentVersions';
-import { InfoFieldButton } from '@/shared/components';
-import { Modal, EntityFormDialog, ActionButton } from '@/shared/components';
-import { uploadDocumentFileToStorage, downloadDocumentFile } from '@/shared/lib/documentUploadDownloadQueries';
-import { createDocumentVersion } from '@/shared/lib/documentVersionsQueries';
+import { useProjects } from '@/shared/hooks/useProjects';
+import { Modal, ActionButton, DocumentsUploadDialog } from '@/shared/components';
+import { uploadDocumentFile, createDocumentVersion, downloadVersionFile } from '@/shared/lib/documentVersionsQueries';
 
 
 export function DocumentsPage() {
-  const {
-    addDocument,
-    loadDocuments,
-    documents,
-  } = useAllDocuments();
+  const { orgId, projectId, documentId } = useParams();
+  const navigate = useNavigate();
 
-  const [open, setOpen] = useState(false);
+  const [document, setDocument] = useState(null);
+  const [project, setProject] = useState(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState(null);
-  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const fileInputRef = useRef(null);
 
-  // Get versions for selected document
-  const { versions, loadVersions } = useDocumentVersions(selectedDocument?.id);
+  const { documents, loadDocuments } = useDocuments(projectId);
+  const { getProjectById } = useProjects(null);
+  
+  // Get versions for the document
+  const { versions, loadVersions } = useDocumentVersions(documentId);
 
-  // Load documents on component mount
+  // Load document and project on component mount
   useEffect(() => {
-    handleLoadDocuments();
-  }, []);
+    const loadData = async () => {
+      if (projectId) {
+        // Load project
+        const { data: projectData, error: projectError } = await getProjectById(projectId);
+        if (!projectError && projectData) {
+          setProject(projectData);
+        }
 
-  // Load versions when document is selected for download
+        // Load documents to find the specific one
+        await loadDocuments();
+      }
+    };
+    loadData();
+  }, [projectId, getProjectById, loadDocuments]);
+
+  // Set document when documents are loaded
   useEffect(() => {
-    if (selectedDocument && downloadOpen) {
+    if (documents && documentId) {
+      const foundDocument = documents.find(d => d.id === documentId);
+      if (foundDocument) {
+        setDocument(foundDocument);
+      }
+    }
+  }, [documents, documentId]);
+
+  // Load versions when document is available
+  useEffect(() => {
+    if (documentId) {
       loadVersions();
     }
-  }, [selectedDocument, downloadOpen, loadVersions]);
+  }, [documentId, loadVersions]);
 
-  const handleLoadDocuments = async () => {
-    setIsLoadingDocuments(true);
-    try {
-      await loadDocuments();
-    } catch (error) {
-      console.error('Error loading documents:', error);
-    } finally {
-      setIsLoadingDocuments(false);
-    }
-  };
-
-  const handleUploadClick = () => {
-    setUploadOpen(true);
-  };
-
-  const handleDownloadClick = () => {
-    setDownloadOpen(true);
-  };
-
-  const handleFileSelect = (event) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedDocument({ ...selectedDocument, file });
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!selectedDocument || !selectedDocument.file) {
-      alert('Please select a document and a file to upload');
-      return;
-    }
-
-    const document = documents.find(d => d.id === selectedDocument.id);
-    if (!document || !document.project) {
-      alert('Document must be associated with a project');
-      return;
-    }
-
-    const organizationId = document.project.organization_id || document.project.organization?.id;
-    const projectId = document.project.id;
-
-    if (!organizationId || !projectId) {
-      alert('Document must be associated with an organization and project');
+  const handleUpload = async ({ documentId: docId, file, changeNote }) => {
+    if (!project || !project.organization_id || !file) {
+      alert('Missing required information for upload');
       return;
     }
 
     setUploading(true);
     try {
       // Upload file to storage
-      const filePath = await uploadDocumentFileToStorage({
-        organizationId,
-        projectId,
-        documentId: document.id,
-        file: selectedDocument.file
+      const filePath = await uploadDocumentFile({
+        organizationId: project.organization_id,
+        projectId: project.id,
+        documentId: docId || documentId,
+        file
       });
 
       // Create document version
       await createDocumentVersion({
-        documentId: document.id,
+        documentId: docId || documentId,
         filePath,
-        changeNote: 'Uploaded via Documents page'
+        changeNote: changeNote || 'Uploaded via Documents page'
       });
 
       alert('File uploaded successfully!');
       setUploadOpen(false);
-      setSelectedDocument(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-      await handleLoadDocuments();
+      await loadVersions(); // Reload versions to show new upload
     } catch (error) {
       console.error('Error uploading file:', error);
       alert(`Error uploading file: ${error.message || error}`);
@@ -116,19 +92,7 @@ export function DocumentsPage() {
     }
   };
 
-  const handleDownload = async () => {
-    if (!selectedDocument) {
-      alert('Please select a document to download');
-      return;
-    }
-
-    const document = documents.find(d => d.id === selectedDocument.id);
-    if (!document) {
-      alert('Document not found');
-      return;
-    }
-
-    // Get the latest version
+  const handleDownload = async ({ documentId: docId }) => {
     if (!versions || versions.length === 0) {
       alert('No versions available for this document');
       return;
@@ -142,18 +106,18 @@ export function DocumentsPage() {
 
     setDownloading(true);
     try {
-      const { data: blob, error } = await downloadDocumentFile(latestVersion.file_url);
+      const { data: blob, error } = await downloadVersionFile(latestVersion.file_url);
       
       if (error) throw error;
 
       if (blob) {
         // Create download link
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const fileName = latestVersion.file_url.split('/').pop() || `document-${document.id}`;
+        const a = window.document.createElement('a');
+        const fileName = latestVersion.file_url.split('/').pop() || `document-${docId || documentId}`;
         a.href = url;
         a.download = fileName;
-        document.body.appendChild(a);
+        window.document.body.appendChild(a);
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
@@ -161,7 +125,6 @@ export function DocumentsPage() {
       }
       
       setDownloadOpen(false);
-      setSelectedDocument(null);
     } catch (error) {
       console.error('Error downloading file:', error);
       alert(`Error downloading file: ${error.message || error}`);
@@ -169,6 +132,15 @@ export function DocumentsPage() {
       setDownloading(false);
     }
   };
+
+  if (!document) {
+    return (
+      <div className="px-8 py-20">
+        <p>Document not found</p>
+        <button onClick={() => navigate(-1)}>← Back</button>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen text-[var(--color-text)]">
@@ -182,166 +154,117 @@ export function DocumentsPage() {
         "
       >
         <div className="flex items-center justify-between gap-8">
-          <h1 className="text-4xl text-left font-semibold distance-bottom-sm">Documents</h1>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-4xl text-left font-semibold distance-bottom-sm">
+              {document.title || 'Untitled Document'}
+            </h1>
+            <p className="text-2xs font-semibold text-left truncate max-w-[60ch]">
+              {project?.name || 'No project'} • Created: {document.created_at ? new Date(document.created_at).toLocaleDateString() : 'N/A'}
+            </p>
+          </div>
           <div className="flex gap-4">
             <ActionButton
               variant="upload"
-              onClick={handleUploadClick}
+              onClick={() => setUploadOpen(true)}
             />
             <ActionButton
               variant="download"
-              onClick={handleDownloadClick}
-            />
-            <ActionButton
-              variant="add"
-              onClick={() => setOpen(true)}
+              onClick={() => setDownloadOpen(true)}
             />
           </div>
         </div>
 
         <hr className="border-white/20 distance-bottom-md" />
 
-        <section className="grid gap-8 grid-cols-2">
-          {documents.map((document) => (
-            <InfoFieldButton
-              key={document.id}
-              id={document.id}
-              title={document.title || 'Untitled Document'}
-              description={document.project?.name || 'No project'}
-              date={document.created_at}
-              to={`/organizations/${document.project?.organization_id || document.project?.organization?.id}/projects/${document.project_id}`}
-            />
-          ))}
+        <section className="space-y-4">
+          <div className="glass rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Document Information</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-400">Title</p>
+                <p className="text-lg text-white">{document.title || 'Untitled Document'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Created</p>
+                <p className="text-lg text-white">
+                  {document.created_at ? new Date(document.created_at).toLocaleString() : 'N/A'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="glass rounded-xl overflow-hidden">
+            {versions && versions.length > 0 ? (
+              <>
+                {/* Table Header */}
+                <div className="grid grid-cols-3 gap-4 bg-white/5 px-6 py-4 border-b border-white/10">
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-300">Version</p>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-300">Change Note</p>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-300">Date</p>
+                  </div>
+                </div>
+
+                {/* Table Body */}
+                <div className="divide-y divide-white/10">
+                  {versions.map((version) => (
+                    <div 
+                      key={version.id} 
+                      className="grid grid-cols-3 gap-4 px-6 py-4 hover:bg-white/5 transition-colors duration-150"
+                    >
+                      <div className="text-left">
+                        <p className="text-sm text-gray-200">v{version.version_number}</p>
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm text-gray-400">{version.change_note || 'No change note'}</p>
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm text-gray-400">
+                          {new Date(version.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="px-6 py-8 text-center">
+                <p className="text-gray-400 text-sm">No versions available yet. Upload a file to create the first version.</p>
+              </div>
+            )}
+          </div>
         </section>
 
-        <Modal isOpen={open} onClose={() => setOpen(false)}>
-          <EntityFormDialog
-            title="Create Document"
-            field1Label="Title"
-            field2Label="Project ID"
-            onCancel={() => setOpen(false)}
-            onCreate={async (data) => {
-              await addDocument({
-                project_id: data.field2,
-                title: data.field1,
-              });
-
-              await handleLoadDocuments();
-              setOpen(false);
-            }}
+        <Modal isOpen={uploadOpen} onClose={() => setUploadOpen(false)}>
+          <DocumentsUploadDialog
+            title="Upload Document File"
+            mode="upload"
+            documents={[document]}
+            selectedDocumentId={documentId}
+            onDocumentSelect={() => {}}
+            onSubmit={handleUpload}
+            onCancel={() => setUploadOpen(false)}
+            submitLabel="Upload"
+            loading={uploading}
           />
         </Modal>
 
-        <Modal isOpen={uploadOpen} onClose={() => setUploadOpen(false)}>
-          <div className="glass p-6 rounded-lg space-y-4 min-w-[400px]">
-            <h2 className="text-2xl font-semibold">Upload Document</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Select Document</label>
-                <select
-                  className="w-full p-2 border rounded glass"
-                  value={selectedDocument?.id || ''}
-                  onChange={(e) => {
-                    const doc = documents.find(d => d.id === e.target.value);
-                    setSelectedDocument(doc ? { id: doc.id } : null);
-                  }}
-                >
-                  <option value="">Choose a document...</option>
-                  {documents.map((doc) => (
-                    <option key={doc.id} value={doc.id}>
-                      {doc.title || 'Untitled'} - {doc.project?.name || 'No project'}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Select File</label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  onChange={handleFileSelect}
-                  className="w-full p-2 border rounded glass"
-                />
-              </div>
-            </div>
-            <div className="flex gap-4 justify-end mt-6">
-              <button
-                onClick={() => {
-                  setUploadOpen(false);
-                  setSelectedDocument(null);
-                  if (fileInputRef.current) {
-                    fileInputRef.current.value = '';
-                  }
-                }}
-                className="px-4 py-2 border rounded glass hover:bg-white/10"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpload}
-                disabled={uploading || !selectedDocument?.id || !selectedDocument?.file}
-                className="px-4 py-2 bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {uploading ? 'Uploading...' : 'Upload'}
-              </button>
-            </div>
-          </div>
-        </Modal>
-
         <Modal isOpen={downloadOpen} onClose={() => setDownloadOpen(false)}>
-          <div className="glass p-6 rounded-lg space-y-4 min-w-[400px]">
-            <h2 className="text-2xl font-semibold">Download Document</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Select Document</label>
-                <select
-                  className="w-full p-2 border rounded glass"
-                  value={selectedDocument?.id || ''}
-                  onChange={(e) => {
-                    const doc = documents.find(d => d.id === e.target.value);
-                    setSelectedDocument(doc ? { id: doc.id } : null);
-                  }}
-                >
-                  <option value="">Choose a document...</option>
-                  {documents.map((doc) => (
-                    <option key={doc.id} value={doc.id}>
-                      {doc.title || 'Untitled'} - {doc.project?.name || 'No project'}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {selectedDocument && versions && versions.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium mb-2">Available Versions</label>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {versions.map((version) => (
-                      <div key={version.id} className="p-2 border rounded glass text-sm">
-                        Version {version.version_number} - {version.change_note || 'No note'} ({new Date(version.created_at).toLocaleDateString()})
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="flex gap-4 justify-end mt-6">
-              <button
-                onClick={() => {
-                  setDownloadOpen(false);
-                  setSelectedDocument(null);
-                }}
-                className="px-4 py-2 border rounded glass hover:bg-white/10"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDownload}
-                disabled={downloading || !selectedDocument?.id || !versions || versions.length === 0}
-                className="px-4 py-2 bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {downloading ? 'Downloading...' : 'Download Latest'}
-              </button>
-            </div>
-          </div>
+          <DocumentsUploadDialog
+            title="Download Document"
+            mode="download"
+            documents={[document]}
+            selectedDocumentId={documentId}
+            onDocumentSelect={() => {}}
+            onSubmit={handleDownload}
+            onCancel={() => setDownloadOpen(false)}
+            submitLabel="Download"
+            loading={downloading}
+          />
         </Modal>
       </div>
     </div>

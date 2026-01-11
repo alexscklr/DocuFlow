@@ -1,3 +1,5 @@
+import { useNavigate, useParams } from 'react-router-dom';
+
 /**
  * Table Component for Projects
  * Displays a list of items with columns: Title, State, Version, Date
@@ -5,6 +7,15 @@
  */
 
 export function Table({ data = [] }) {
+  const navigate = useNavigate();
+  const { orgId, projectId } = useParams();
+
+  const handleRowClick = (documentId) => {
+    if (orgId && projectId && documentId) {
+      navigate(`/organizations/${orgId}/projects/${projectId}/documents/${documentId}`);
+    }
+  };
+
   return (
     <div className="glass rounded-xl overflow-hidden">
       {/* Table Header */}
@@ -31,7 +42,11 @@ export function Table({ data = [] }) {
           </div>
         ) : (
           data.map((item, index) => (
-            <div key={index} className="grid grid-cols-4 gap-4 px-6 py-4 hover:bg-white/5 transition-colors duration-150">
+            <div 
+              key={index} 
+              onClick={() => handleRowClick(item.id)}
+              className="grid grid-cols-4 gap-4 px-6 py-4 hover:bg-white/5 transition-colors duration-150 cursor-pointer"
+            >
               <div className="text-left">
                 <p className="text-sm text-gray-200">{item.title}</p>
               </div>

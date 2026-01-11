@@ -51,6 +51,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/organizations/:orgId/projects" element={<ProjectsPage />} />
           <Route path="/organizations/:orgId/projects/:projectId" element={<ProjectPage />} />
+          <Route path="/organizations/:orgId/projects/:projectId/documents/:documentId" element={<DocumentsPage />} />
         </Routes>
         {/* Footer */}
       </Router>
