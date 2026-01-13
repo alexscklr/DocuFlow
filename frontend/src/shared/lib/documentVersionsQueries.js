@@ -6,7 +6,7 @@ export async function getDocumentVersions(documentId) {
     .from('document_versions')
     .select('*')
     .eq('document_id', documentId)
-    .order('version_number', { descending: true });
+    .order('version_number', { ascending: false });
   return { data, error };
 }
 
