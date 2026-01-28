@@ -5,6 +5,7 @@ import { useUserProjects } from "@/shared/hooks/useProfile";
 import { useAppData } from '@/shared/context/AppDataContextBase';
 import { useProfilesByIds } from "@/shared/hooks/useProfilesByIds";
 import { Modal, EntityFormDialog,} from '@/shared/components';
+import { uploadAvatar } from '@/shared/lib/profileQueries';
 
 export function ProfilePage() {
   const { profileId } = useParams();
@@ -21,6 +22,21 @@ export function ProfilePage() {
   if (!myProfile) return null;
   if (!profileToShow) return <div>Loading profile…</div>;
 
+  const handleAvatarChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file || !profileToShow?.id) return;
+
+    try {
+      const { data, error } = await uploadAvatar(profileToShow.id, file);
+      if (error) throw error;
+
+      await updateProfile({ avatar_url: data.publicUrl });
+    } catch (err) {
+      console.error('Avatar upload failed:', err.message);
+    } finally {
+      event.target.value = '';
+    }
+  };
 
   return (
     <div className="
@@ -33,15 +49,53 @@ export function ProfilePage() {
       <div className="grid grid-cols-[220px_1fr] gap-8">
         {/* left side */}
         <section id="avatarSectionId" className="flex flex-col items-center gap-4">
-         <div className="w-[220px] h-[220px] rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-          {profileToShow?.avatar_url ? (
+          <label
+            className="
+              w-[220px] h-[220px]
+              rounded-full overflow-hidden
+              bg-gray-200
+              flex items-center justify-center
+              cursor-pointer
+              relative
+              group
+            "
+          >
+            {profileToShow?.avatar_url ? (
               <img
                 src={profileToShow.avatar_url}
                 alt="User avatar"
                 className="w-full h-full object-cover"
-              />) : (<span className="text-gray-500">No avatar</span> )}
-          </div>
-          <button className="glass-btn justify-center w-full" onClick={() => setEditOpen(true)}>Edit</button>
+              />
+            ) : (
+              <span className="text-gray-500">No avatar</span>
+            )}
+
+            {isOwnProfile && (
+              <div
+                className="
+                  absolute inset-0
+                  bg-black/40
+                  opacity-0 group-hover:opacity-100
+                  flex items-center justify-center
+                  text-white text-sm
+                  transition
+                "
+              >
+                Change avatar
+              </div>
+            )}
+
+            {isOwnProfile && (
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+                disabled={loading}
+              />
+            )}
+          </label>
+          {isOwnProfile && ( <button className="glass-btn justify-center w-full" onClick={() => setEditOpen(true)} > Edit </button> )}
         </section>
 
         {/* right side */}
