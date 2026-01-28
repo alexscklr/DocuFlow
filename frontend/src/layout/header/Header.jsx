@@ -7,12 +7,11 @@ export default function Header() {
     return (
         <header className="w-full border-b border-white/20">
             <div className="h-[80px] flex items-center justify-between px-[20px]">
-                <h1 className="text-5xl text-left font-semibold">DokuFlow</h1>
+                <p className="text-5xl text-left font-semibold">DokuFlow</p>
 
                 <div className="ml-auto">
                     <LoginButton /> 
                 </div>
-
             </div>
         </header>
     );
