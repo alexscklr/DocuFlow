@@ -12,10 +12,12 @@ export function ProfilePage() {
   const [editOpen, setEditOpen] = useState(false);
 
   const isOwnProfile = myProfile && profileId === myProfile.id;
-  const profileToShow = isOwnProfile ? myProfile : null;
+  const { profilesMap } = useProfilesByIds(isOwnProfile ? [] : [profileId]);
+  const profileIdToUse = isOwnProfile ? myProfile.id : profileId;
 
-  const { projects, loading } = useUserProjects(profileToShow?.id);
+  const { projects, loading } = useUserProjects(profileIdToUse);
 
+  const profileToShow = isOwnProfile ? myProfile : profilesMap[profileId];
   if (!myProfile) return null;
   if (!profileToShow) return <div>Loading profile…</div>;
 
