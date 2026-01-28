@@ -75,8 +75,8 @@ export const SignupForm = () => {
                     />
                 </label>
 
-                <label htmlFor="password" className="block space-y-3">
-                    <span className="text-xs font-semibold tracking-wide">
+                <label htmlFor="password" className="block distance-bottom-md">
+                    <span className="text-xs font-semibold tracking-wide ">
                         Password
                     </span>
                     <input
@@ -102,7 +102,7 @@ export const SignupForm = () => {
 
                 <button
                     type="submit"
-                    className="glass-btn sm:flex-stretch md:w-50 justify-center mx-auto px-6 disabled:opacity-50 disabled:pointer-events-none"
+                    className="glass-btn w-40 mx-auto flex self-center justify-center px-4 py-2"
                     disabled={loading}
                 >
                     {loading ? "Creating account..." : "Create account"}

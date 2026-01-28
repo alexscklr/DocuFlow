@@ -48,7 +48,7 @@ export const LoginForm = () => {
           />
         </label>
 
-        <label htmlFor="password" className="block space-y-3">
+        <label htmlFor="password" className="block distance-bottom-md">
           <span className="text-xs font-semibold tracking-wide">
             Password
           </span>
@@ -69,7 +69,7 @@ export const LoginForm = () => {
 
         <button
           type="submit"
-          className="glass-btn sm:flex-stretch md:w-50 justify-center mx-auto px-6"
+          className="glass-btn w-40 mx-auto flex self-center justify-center px-4 py-2"
         > 
           Sign in
         </button>
