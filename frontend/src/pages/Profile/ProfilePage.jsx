@@ -2,10 +2,24 @@ import { useParams } from "react-router-dom";
 import { ProjectField } from '@/shared/components';
 import { useUserProjects } from "@/shared/hooks/useProfile";
 import { useAppData } from '@/shared/context/AppDataContextBase';
+import { useProfilesByIds } from "@/shared/hooks/useProfilesByIds";
 
 export function ProfilePage() {
-  const { projects, loading } = useUserProjects();
-  const { profile } = useAppData();
+  const { profileId } = useParams();
+  const { profile: myProfile } = useAppData();
+  if (!myProfile) {
+    return;
+  }
+  const isOwnProfile = profileId === myProfile.id;
+  const { profilesMap } = useProfilesByIds(isOwnProfile ? [] : [profileId]);
+  const profileIdToUse = isOwnProfile ? myProfile.id : profileId;
+  const { projects, loading } = useUserProjects(profileIdToUse);
+
+  const profileToShow = isOwnProfile ? myProfile : profilesMap[profileId];
+
+  if (!profileToShow) {
+    return <div>Loading profile…</div>;
+  }
   
 
   return (
@@ -20,9 +34,9 @@ export function ProfilePage() {
         {/* left side */}
         <section id="avatarSectionId" className="flex flex-col items-center gap-4">
          <div className="w-[220px] h-[220px] rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-          {profile?.avatar_url ? (
+          {profileToShow?.avatar_url ? (
               <img
-                src={profile.avatar_url}
+                src={profileToShow.avatar_url}
                 alt="User avatar"
                 className="w-full h-full object-cover"
               />) : (<span className="text-gray-500">No avatar</span> )}
@@ -32,7 +46,7 @@ export function ProfilePage() {
 
         {/* right side */}
         <section>
-          <h1 className="text-4xl text-left font-semibold  distance-bottom-sm">{profile?.display_name || 'Name is not set yet'}</h1>
+          <h1 className="text-4xl text-left font-semibold  distance-bottom-sm">{profileToShow?.display_name || 'Name is not set yet'}</h1>
           <hr className="border-white/20 distance-bottom-md"/>
 
           <section id="projectsSectionId" className="distance-bottom-md">
@@ -62,9 +76,9 @@ export function ProfilePage() {
             <h2 className="text-xl font-semibold flex items-center gap-2 distance-bottom-sm"> <span>👤</span> Personal Information </h2>
            
             <div className="grid grid-cols-1 border glass rounded-lg p-4">
-              <p className="text-2xs text-left distance-bottom-md disa">E-Mail: <span className="text-2xs text-left text-white">{profile?.email || 'Email is not set yet'}</span></p>
+              <p className="text-2xs text-left distance-bottom-md disa">E-Mail: <span className="text-2xs text-left text-white">{profileToShow?.email || 'Email is not set yet'}</span></p>
 
-              <p className="text-2xs text-left ">Phone: <span className="text-2xs text-left text-white">{profile?.phone_number || 'Phone is not set yet'}</span></p>
+              <p className="text-2xs text-left ">Phone: <span className="text-2xs text-left text-white">{profileToShow?.phone || 'Phone is not set yet'}</span></p>
             </div>  
           </section>
 
