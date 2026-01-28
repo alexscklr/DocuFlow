@@ -1,26 +1,24 @@
 import { useParams } from "react-router-dom";
+import { useState} from 'react';
 import { ProjectField } from '@/shared/components';
 import { useUserProjects } from "@/shared/hooks/useProfile";
 import { useAppData } from '@/shared/context/AppDataContextBase';
 import { useProfilesByIds } from "@/shared/hooks/useProfilesByIds";
+import { Modal, EntityFormDialog,} from '@/shared/components';
 
 export function ProfilePage() {
   const { profileId } = useParams();
-  const { profile: myProfile } = useAppData();
-  if (!myProfile) {
-    return;
-  }
-  const isOwnProfile = profileId === myProfile.id;
-  const { profilesMap } = useProfilesByIds(isOwnProfile ? [] : [profileId]);
-  const profileIdToUse = isOwnProfile ? myProfile.id : profileId;
-  const { projects, loading } = useUserProjects(profileIdToUse);
+  const { profile: myProfile, updateProfile } = useAppData();
+  const [editOpen, setEditOpen] = useState(false);
 
-  const profileToShow = isOwnProfile ? myProfile : profilesMap[profileId];
+  const isOwnProfile = myProfile && profileId === myProfile.id;
+  const profileToShow = isOwnProfile ? myProfile : null;
 
-  if (!profileToShow) {
-    return <div>Loading profile…</div>;
-  }
-  
+  const { projects, loading } = useUserProjects(profileToShow?.id);
+
+  if (!myProfile) return null;
+  if (!profileToShow) return <div>Loading profile…</div>;
+
 
   return (
     <div className="
@@ -41,7 +39,7 @@ export function ProfilePage() {
                 className="w-full h-full object-cover"
               />) : (<span className="text-gray-500">No avatar</span> )}
           </div>
-          <button className="glass-btn w-full">Edit</button>
+          <button className="glass-btn justify-center w-full" onClick={() => setEditOpen(true)}>Edit</button>
         </section>
 
         {/* right side */}
@@ -78,12 +76,33 @@ export function ProfilePage() {
             <div className="grid grid-cols-1 border glass rounded-lg p-4">
               <p className="text-2xs text-left distance-bottom-md disa">E-Mail: <span className="text-2xs text-left text-white">{profileToShow?.email || 'Email is not set yet'}</span></p>
 
-              <p className="text-2xs text-left ">Phone: <span className="text-2xs text-left text-white">{profileToShow?.phone || 'Phone is not set yet'}</span></p>
+              <p className="text-2xs text-left ">Phone: <span className="text-2xs text-left text-white">{profileToShow?.phone_number || 'Phone is not set yet'}</span></p>
             </div>  
           </section>
-
         </section>
+
+        <Modal isOpen={editOpen} onClose={() => setEditOpen(false)}>
+          <EntityFormDialog
+            title="Edit profile"
+            field1Label="Name"
+            field2Label="Phone"
+            submitLabel="Save"
+            initialValues={{
+              field1: profileToShow.display_name,
+              field2: profileToShow.phone_number,
+            }}
+            onCancel={() => setEditOpen(false)}
+            onSubmit={async (data) => {
+              const updates = {
+                display_name: data.field1,
+                phone_number: data.field2,
+              };
+              await updateProfile(updates);
+              setEditOpen(false);
+            }}
+          />
+        </Modal>
       </div>
     </div>
-  );
+);
 };
