@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDocuments } from '@/shared/hooks/useDocuments';
 import { useDocumentVersions } from '@/shared/hooks/useDocumentVersions';
 import { useProjects } from '@/shared/hooks/useProjects';
-import { Modal, ActionButton, DocumentsUploadDialog } from '@/shared/components';
-import { uploadDocumentFile, createDocumentVersion, downloadVersionFile } from '@/shared/lib/documentVersionsQueries';
+import { Modal, ActionButton, DocumentsUploadDialog, VersionCommentDialog } from '@/shared/components';
+import { uploadDocumentFile, createDocumentVersion, downloadVersionFile, getVersionComments } from '@/shared/lib/documentVersionsQueries';
 
 
 export function DocumentsPage() {
@@ -15,6 +15,10 @@ export function DocumentsPage() {
   const [project, setProject] = useState(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
+  const [commentOpen, setCommentOpen] = useState(false);
+  const [selectedVersion, setSelectedVersion] = useState(null);
+  const [hoveredVersion, setHoveredVersion] = useState(null);
+  const [hoverComments, setHoverComments] = useState({});
   const [uploading, setUploading] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
@@ -57,6 +61,24 @@ export function DocumentsPage() {
       loadVersions();
     }
   }, [documentId, loadVersions]);
+
+  // Load comments when hovering over a version
+  useEffect(() => {
+    if (hoveredVersion) {
+      const loadHoverComments = async () => {
+        try {
+          const { data } = await getVersionComments(hoveredVersion.id);
+          setHoverComments(prev => ({
+            ...prev,
+            [hoveredVersion.id]: data || []
+          }));
+        } catch (error) {
+          console.error('Error loading hover comments:', error);
+        }
+      };
+      loadHoverComments();
+    }
+  }, [hoveredVersion]);
 
   const handleUpload = async ({ documentId: docId, file, changeNote }) => {
     if (!project || !project.organization_id || !file) {
@@ -176,64 +198,106 @@ export function DocumentsPage() {
 
         <hr className="border-white/20 distance-bottom-md" />
 
-        <section className="space-y-4">
-          <div className="glass rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Document Information</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-400">Title</p>
-                <p className="text-lg text-white">{document.title || 'Untitled Document'}</p>
+        <section>
+          <div className="glass rounded-xl overflow-hidden distance-bottom-md">
+            {/* Table Header */}
+            <div className="grid grid-cols-2 gap-4 bg-white/5 px-6 py-4 border-b border-white/10">
+              <div className="text-left">
+                <p className="text-sm font-semibold text-gray-300">Title</p>
               </div>
-              <div>
-                <p className="text-sm text-gray-400">Created</p>
-                <p className="text-lg text-white">
-                  {document.created_at ? new Date(document.created_at).toLocaleString() : 'N/A'}
-                </p>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-gray-300">Created</p>
+              </div>
+            </div>
+
+            {/* Table Body */}
+            <div className="divide-y divide-white/10">
+              <div className="grid grid-cols-2 gap-4 px-6 py-4 hover:bg-white/5 transition-colors duration-150">
+                <div className="text-left">
+                  <p className="text-sm text-gray-200">{document.title || 'Untitled Document'}</p>
+                </div>
+                <div className="text-left">
+                  <p className="text-sm text-gray-400">
+                    {document.created_at ? new Date(document.created_at).toLocaleString() : 'N/A'}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="glass rounded-xl overflow-hidden">
-            {versions && versions.length > 0 ? (
-              <>
-                {/* Table Header */}
-                <div className="grid grid-cols-3 gap-4 bg-white/5 px-6 py-4 border-b border-white/10">
-                  <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-300">Version</p>
+          <div className="relative">
+            <div className="glass rounded-xl overflow-hidden">
+              {versions && versions.length > 0 ? (
+                <>
+                  {/* Table Header */}
+                  <div className="grid grid-cols-3 gap-4 bg-white/5 px-6 py-4 border-b border-white/10">
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-gray-300">Version</p>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-gray-300">Change Note</p>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-gray-300">Date</p>
+                    </div>
                   </div>
-                  <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-300">Change Note</p>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-300">Date</p>
-                  </div>
-                </div>
 
-                {/* Table Body */}
-                <div className="divide-y divide-white/10">
-                  {versions.map((version) => (
-                    <div 
-                      key={version.id} 
-                      className="grid grid-cols-3 gap-4 px-6 py-4 hover:bg-white/5 transition-colors duration-150"
-                    >
-                      <div className="text-left">
-                        <p className="text-sm text-gray-200">v{version.version_number}</p>
-                      </div>
-                      <div className="text-left">
-                        <p className="text-sm text-gray-400">{version.change_note || 'No change note'}</p>
-                      </div>
-                      <div className="text-left">
-                        <p className="text-sm text-gray-400">
-                          {new Date(version.created_at).toLocaleString()}
-                        </p>
-                      </div>
+                  {/* Table Body */}
+                  <div className="divide-y divide-white/10">
+                    {versions.map((version) => {
+                      return (
+                        <div 
+                          key={version.id}
+                          onMouseEnter={() => setHoveredVersion(version)}
+                          onMouseLeave={() => setHoveredVersion(null)}
+                        >
+                          <div 
+                            className="grid grid-cols-3 gap-4 px-6 py-4 hover:bg-white/5 transition-colors duration-150 cursor-pointer"
+                            onClick={() => {
+                              setSelectedVersion(version);
+                              setCommentOpen(true);
+                            }}
+                          >
+                            <div className="text-left">
+                              <p className="text-sm text-gray-200">v{version.version_number}</p>
+                            </div>
+                            <div className="text-left">
+                              <p className="text-sm text-gray-400">{version.change_note || 'No change note'}</p>
+                            </div>
+                            <div className="text-left">
+                              <p className="text-sm text-gray-400">
+                                {new Date(version.created_at).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <div className="px-6 py-8 text-center">
+                  <p className="text-gray-400 text-sm">No versions available yet. Upload a file to create the first version.</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Hover Tooltip - Positioned below the table */}
+            {hoveredVersion && hoverComments[hoveredVersion.id] && hoverComments[hoveredVersion.id].length > 0 && (
+              <div className="absolute left-0 top-full mt-2 z-50 w-full glass border rounded-lg p-4 shadow-xl">
+                <p className="text-xs font-semibold text-gray-300 mb-3">
+                  Comments ({hoverComments[hoveredVersion.id].length}):
+                </p>
+                <div className="space-y-3">
+                  {hoverComments[hoveredVersion.id].map((comment) => (
+                    <div key={comment.id} className="border-b border-white/10 pb-3 last:border-0">
+                      <p className="text-xs text-gray-400 mb-1">
+                        {new Date(comment.created_at).toLocaleString()}
+                      </p>
+                      <p className="text-sm text-white break-words">{comment.content}</p>
                     </div>
                   ))}
                 </div>
-              </>
-            ) : (
-              <div className="px-6 py-8 text-center">
-                <p className="text-gray-400 text-sm">No versions available yet. Upload a file to create the first version.</p>
               </div>
             )}
           </div>
@@ -243,9 +307,7 @@ export function DocumentsPage() {
           <DocumentsUploadDialog
             title="Upload Document File"
             mode="upload"
-            documents={[document]}
             selectedDocumentId={documentId}
-            onDocumentSelect={() => {}}
             onSubmit={handleUpload}
             onCancel={() => setUploadOpen(false)}
             submitLabel="Upload"
@@ -257,14 +319,40 @@ export function DocumentsPage() {
           <DocumentsUploadDialog
             title="Download Document"
             mode="download"
-            documents={[document]}
             selectedDocumentId={documentId}
-            onDocumentSelect={() => {}}
             onSubmit={handleDownload}
             onCancel={() => setDownloadOpen(false)}
             submitLabel="Download"
             loading={downloading}
           />
+        </Modal>
+
+        <Modal isOpen={commentOpen} onClose={() => {
+          setCommentOpen(false);
+          setSelectedVersion(null);
+        }}>
+          {selectedVersion && (
+            <VersionCommentDialog
+              title={`Comments for Version ${selectedVersion.version_number}`}
+              versionId={selectedVersion.id}
+              versionNumber={selectedVersion.version_number}
+              onCancel={() => {
+                setCommentOpen(false);
+                setSelectedVersion(null);
+              }}
+              onCommentAdded={() => {
+                // Reload comments for hover tooltip
+                if (selectedVersion) {
+                  getVersionComments(selectedVersion.id).then(({ data }) => {
+                    setHoverComments(prev => ({
+                      ...prev,
+                      [selectedVersion.id]: data || []
+                    }));
+                  });
+                }
+              }}
+            />
+          )}
         </Modal>
       </div>
     </div>

@@ -4,6 +4,7 @@ export { default as InfoFieldButton } from './InfoFieldButton/InfoFieldButton';
 export { default as EntityFormDialog } from './EntityFormDialog/EntityFormDialog';
 export { default as DokumentFormDialog } from './DokumentFormDialog/DokumentFormDialog';
 export { default as DocumentsUploadDialog } from './DocumentsUploadDialog/DocumentsUploadDialog';
+export { default as VersionCommentDialog } from './VersionCommentDialog/VersionCommentDialog';
 export { default as Modal } from './Modal/Modal';
 export { default as ActionButton } from './ActionButton/ActionButton';
 export { default as ConfirmDeleteDialog } from './ConfirmDeleteDialog/ConfirmDeleteDialog';

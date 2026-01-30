@@ -4,22 +4,19 @@ export default function DocumentsUploadDialog({
   width = '520px',
   title,
   mode = 'upload', // 'upload' or 'download'
-  documents = [],
   selectedDocumentId = '',
-  onDocumentSelect,
   onSubmit,
   onCancel,
   submitLabel = 'Submit',
   loading = false,
 }) {
-  const [selectedDocId, setSelectedDocId] = useState(selectedDocumentId);
   const [file, setFile] = useState(null);
   const [changeNote, setChangeNote] = useState('');
   const fileInputRef = useRef(null);
 
   const isSubmitDisabled = mode === 'upload' 
-    ? (!selectedDocId || !file)
-    : (!selectedDocId);
+    ? (!selectedDocumentId || !file)
+    : (!selectedDocumentId);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files?.[0];
@@ -31,22 +28,14 @@ export default function DocumentsUploadDialog({
   const handleSubmit = () => {
     if (mode === 'upload') {
       onSubmit({
-        documentId: selectedDocId,
+        documentId: selectedDocumentId,
         file,
         changeNote: changeNote.trim() || 'Uploaded via Project page',
       });
     } else {
       onSubmit({
-        documentId: selectedDocId,
+        documentId: selectedDocumentId,
       });
-    }
-  };
-
-  const handleDocumentChange = (e) => {
-    const docId = e.target.value;
-    setSelectedDocId(docId);
-    if (onDocumentSelect) {
-      onDocumentSelect(docId);
     }
   };
 
@@ -59,26 +48,6 @@ export default function DocumentsUploadDialog({
         <h2 className="text-lg font-semibold text-white distance-bottom-sm">
           {title}
         </h2>
-
-        <div className="w-full distance-bottom-sm">
-          <label className="block text-2xs text-white text-left">
-            Select Document
-          </label>
-          <select
-            value={selectedDocId}
-            onChange={handleDocumentChange}
-            className="
-              glass w-full px-3 py-2 text-sm bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-white/40
-            "
-          >
-            <option value="">Choose a document...</option>
-            {documents.map((doc) => (
-              <option key={doc.id} value={doc.id}>
-                {doc.title || 'Untitled Document'}
-              </option>
-            ))}
-          </select>
-        </div>
 
         {mode === 'upload' && (
           <>

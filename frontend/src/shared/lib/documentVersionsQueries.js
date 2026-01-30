@@ -75,6 +75,28 @@ export async function addVersionComment({ version_id, content }) {
   return { data, error };
 }
 
+// Update a version comment
+export async function updateVersionComment(commentId, content) {
+  const { data, error } = await supabase
+    .from('document_comments')
+    .update({ content })
+    .eq('id', commentId)
+    .select()
+    .single();
+
+  return { data, error };
+}
+
+// Delete a version comment
+export async function deleteVersionComment(commentId) {
+  const { error } = await supabase
+    .from('document_comments')
+    .delete()
+    .eq('id', commentId);
+
+  return { error };
+}
+
 // Create a signed URL for downloading a stored document version file
 export async function getVersionSignedUrl(filePath, expiresInSeconds = 3600) {
   const { data, error } = await supabase.storage
