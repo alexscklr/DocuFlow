@@ -122,7 +122,7 @@ export default function ProjectPage() {
             </p>
           </div>
 
-          <div className="flex gap-4 shrink-0 self-end distance-bottom-xs">
+          <div className="flex gap-4 shrink-0 self-end distance-bottom-sm">
             <ActionButton variant="delete" onClick={() => setDeleteOpen(true)} />
             <ActionButton variant="edit" onClick={() => setEditOpen(true)} />
             <ActionButton variant="add" onClick={() => setCreateOpen(true)} />

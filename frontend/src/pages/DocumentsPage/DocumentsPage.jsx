@@ -184,7 +184,7 @@ export function DocumentsPage() {
               {project?.name || 'No project'} • Created: {document.created_at ? new Date(document.created_at).toLocaleDateString() : 'N/A'}
             </p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-4 shrink-0 self-end distance-bottom-sm">
             <ActionButton
               variant="upload"
               onClick={() => setUploadOpen(true)}
