@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDocuments } from '@/shared/hooks/useDocuments';
 import { useProjects } from '@/shared/hooks/useProjects';
 import { useDocumentStatuses } from '@/shared/hooks/useDocumentStatuses';
-import { Modal, EntityFormDialog, DokumentFormDialog, ActionButton, ConfirmDeleteDialog } from '@/shared/components';
+import { Modal, EntityFormDialog, DokumentFormDialog, ActionButton, ConfirmDeleteDialog, MembersDialog } from '@/shared/components';
 import { Table } from '@/shared/components/TableProject/Table';
 
 export default function ProjectPage() {

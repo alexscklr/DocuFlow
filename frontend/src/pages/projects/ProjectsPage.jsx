@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppData } from '@/shared/context/AppDataContextBase';
 import { useProjects } from '@/shared/hooks/useProjects';
-import { Modal, EntityFormDialog, InfoFieldButton, ActionButton, ConfirmDeleteDialog } from '@/shared/components';
+import { Modal, EntityFormDialog, InfoFieldButton, ActionButton, ConfirmDeleteDialog, MembersDialog } from '@/shared/components';
 
 
 export default function ProjectsPage() {
@@ -15,6 +15,7 @@ export default function ProjectsPage() {
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const [editOrgOpen, setEditOrgOpen] = useState(false);
   const [deleteOrgOpen, setDeleteOrgOpen] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(false);
 
   const {
     projects,
@@ -65,6 +66,7 @@ export default function ProjectsPage() {
             <ActionButton variant="delete" onClick={() => setDeleteOrgOpen(true)} />
             <ActionButton variant="edit" onClick={() => setEditOrgOpen(true)} />
             <ActionButton variant="add" onClick={() => setCreateProjectOpen(true)} />
+            <ActionButton variant="members" onClick={() => setMembersOpen(true)}/>
           </div>
         </div>
         <hr className="border-white/20 distance-bottom-md" />
@@ -135,7 +137,15 @@ export default function ProjectsPage() {
               }}
             />
         </Modal>
-
+        
+        <Modal isOpen={membersOpen} onClose={() => setMembersOpen(false)}>
+          <MembersDialog
+            title="Organisation Members"
+            organizationId={org.id}
+            onInvite={() => {}}
+            onClose={() => setMembersOpen(false)}
+          />
+        </Modal>
       </div>
     </div>
   );

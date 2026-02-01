@@ -4,23 +4,24 @@ const ICONS = {
   delete: 'x',
   upload: '↑',
   download: '↓',
+  members: '👥',
 };
 
 const STYLES = {
   base: `
     w-8 h-8
-    border 
+    border
     glass
     rounded-full
-    flex items-center justify-center
-    text-xl
-    transition-colors
-  `,
+    grid place-items-center
+    text-xl leading-none
+    transition-colors`,
   add: 'hover:bg-white/10',
   edit: 'hover:bg-blue-500/10',
   delete: 'hover:bg-red-500/10',
   upload: 'hover:bg-green-500/10',
   download: 'hover:bg-blue-500/10',
+  members: 'hover:bg-purple-500/10',
 };
 
 export default function ActionButton({

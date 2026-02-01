@@ -14,6 +14,7 @@ body {
   --color-glass-btn-border: rgba(255, 255, 255, 0.12);
   --color-glass-btn-hover: rgba(255, 255, 255, 0.10);
   --color-glass-btn-hover-border: rgba(255, 255, 255, 0.20);
+  --color-glass-bg-dropdown: rgba(0, 0, 0, 0.95);
   --color-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
   --color-link: #e9edf5;
 }
@@ -195,4 +196,27 @@ h6 {
 
 .distance-bottom-xl {
   margin-bottom: 32px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; 
+  scrollbar-width: none; 
+}
+
+.glass-flat {
+  background: var(--color-glass-bg);
+  border: 1px solid var(--color-glass-border);
+  border-radius: 16px;
+  color: var(--color-text);
+}
+
+.glass-flat-dropdown {
+  background: var(--color-glass-bg-dropdown);
+  border: 1px solid var(--color-glass-border);
+  border-radius: 16px;
+  color: var(--color-text);
 }

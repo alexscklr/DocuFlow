@@ -43,10 +43,13 @@ export function OrganizationsPage() {
       >
         <div className="flex items-center justify-between gap-8">
           <h1 className="text-4xl text-left font-semibold distance-bottom-sm">Organisations</h1>
-          <ActionButton
-            variant="add"
-            onClick={() => setOpen(true)}
-          />
+          <div className="flex gap-4 shrink-0 self-end distance-bottom-sm">
+            <ActionButton
+              variant="add"
+              onClick={() => setOpen(true)}
+            />
+          </div>
+         
         </div>
 
         <hr className="border-white/20 distance-bottom-md" />
@@ -70,7 +73,7 @@ export function OrganizationsPage() {
             field1Label="Name"
             field2Label="Description"
             onCancel={() => setOpen(false)}
-            onCreate={async (data) => {
+            onSubmit={async (data) => {
               await addOrganization({
                 name: data.field1,
                 description: data.field2,

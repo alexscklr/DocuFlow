@@ -8,3 +8,6 @@ export { default as VersionCommentDialog } from './VersionCommentDialog/VersionC
 export { default as Modal } from './Modal/Modal';
 export { default as ActionButton } from './ActionButton/ActionButton';
 export { default as ConfirmDeleteDialog } from './ConfirmDeleteDialog/ConfirmDeleteDialog';
+export { default as MembersDialog } from './MembersDialog/MembersDialog';
+export { default as MembersInfo } from './MembersInfo/MembersInfo';
+export { default as Dropdown } from './Dropdown/Dropdown';
