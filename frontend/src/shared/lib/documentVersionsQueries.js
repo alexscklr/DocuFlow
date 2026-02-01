@@ -15,24 +15,32 @@ export async function uploadDocumentFile({
   organizationId,
   projectId,
   documentId,
-  file
+  file,
+  //userId
 }) {
+  if (!organizationId) throw new Error('Missing organizationId');
+  if (!projectId) throw new Error('Missing projectId');
+  if (!documentId) throw new Error('Missing documentId');
+
   const fileExt = file.name.split('.').pop();
   const fileName = `${uuidv4()}.${fileExt}`;
 
+  // Pfad: organizationId/projectId/documentId/fileName
   const filePath = `${organizationId}/${projectId}/${documentId}/${fileName}`;
 
   const { error } = await supabase.storage
     .from('documents')
     .upload(filePath, file, {
       upsert: false,
-      contentType: file.type
+      contentType: file.type,
+      //owner: userId
     });
 
   if (error) throw error;
 
   return filePath;
 }
+
 
 
 export async function createDocumentVersion({

@@ -77,29 +77,49 @@ export default function DocumentVersionsTesting({
   }, [setKnownDocumentIds]);
 
   const handleUploadAndCreateVersion = useCallback(async () => {
-    if (!documentId || !projectId || !organizationId || !fileToUpload) return;
-    
+    if (!documentId || !projectId || !fileToUpload) {
+      console.warn('Fehlende Parameter:', { documentId, projectId, fileToUpload });
+      return;
+    }
+
+    // Hole organization_id aus dem aktuellen Projekt
+    const currentProject = projects.find(p => p.id === projectId);
+    const orgIdToUse = currentProject?.organization_id;
+    if (!orgIdToUse) {
+      alert('Projekt hat keine organization_id!');
+      return;
+    }
+
     try {
       setUploading(true);
       const noteToUse = changeNote.trim() || 'Initial upload';
+      console.log('Starte Upload:', {
+        organizationId: orgIdToUse,
+        projectId,
+        documentId,
+        fileToUpload,
+        changeNote: noteToUse,
+      });
       const { error, data } = await uploadAndCreateVersion({
-        organizationId,
+        organizationId: orgIdToUse,
         projectId,
         documentId,
         file: fileToUpload,
         changeNote: noteToUse,
       });
+      console.log('Upload Ergebnis:', { error, data });
       if (error) throw error;
       alert(`Version ${data?.version_number ?? ''} erstellt`);
       rememberDocId(documentId);
       setFileToUpload(null);
-      // Don't clear changeNote - keep it for next upload
+      // Don't clear changeNote - keep it für next upload
     } catch (err) {
+      console.error('Fehler beim Upload:', err);
       alert(err.message || String(err));
     } finally {
       setUploading(false);
     }
-  }, [documentId, projectId, organizationId, fileToUpload, changeNote, uploadAndCreateVersion, rememberDocId]);
+  }, [documentId, projectId, fileToUpload, changeNote, uploadAndCreateVersion, rememberDocId, projects]);
 
   const handleDownloadVersion = useCallback(async (version) => {
     if (!version.file_url) return;
@@ -280,7 +300,7 @@ export default function DocumentVersionsTesting({
         <button
           type="button"
           className="glass-btn"
-          disabled={uploading || !documentId || !projectId || !organizationId || !fileToUpload}
+          disabled={uploading || !documentId || !projectId || !fileToUpload}
           onClick={handleUploadAndCreateVersion}
         >
           {uploading ? 'Lädt…' : 'Datei hochladen & Version'}

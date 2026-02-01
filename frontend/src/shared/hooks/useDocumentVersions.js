@@ -1,20 +1,22 @@
 import { useEffect, useState, useCallback } from 'react';
-import { 
-  getDocumentVersions, 
-  createDocumentVersion, 
-  getVersionComments, 
-  addVersionComment, 
+import {
+  getDocumentVersions,
+  createDocumentVersion,
+  getVersionComments,
+  addVersionComment,
   uploadDocumentFile,
   getVersionSignedUrl,
   downloadVersionFile,
   deleteOldVersions,
   revertDocumentToVersion
 } from '@/shared/lib/documentVersionsQueries';
+//import { useAuthSession } from '@/shared/hooks/useAuthSession';
 
 export function useDocumentVersions(documentId) {
   const [versions, setVersions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  //const { user } = useAuthSession();
 
   const loadVersions = useCallback(async () => {
     if (!documentId) {
@@ -44,14 +46,39 @@ export function useDocumentVersions(documentId) {
     return { data, error };
   }, [documentId]);
 
-  const uploadAndCreateVersion = useCallback(async ({ organizationId, projectId, file, changeNote = 'Initial upload' }) => {
-    if (!documentId) return { data: null, error: new Error('Missing documentId') };
-    if (!organizationId || !projectId) return { data: null, error: new Error('Missing organizationId or projectId') };
-    const filePath = await uploadDocumentFile({ organizationId, projectId, documentId, file });
-    const { data, error } = await createDocumentVersion({ documentId, filePath, changeNote });
-    if (!error && data) setVersions(prev => [data, ...prev]);
-    return { data, error };
-  }, [documentId]);
+  const uploadAndCreateVersion = useCallback(
+    async ({ organizationId = null, projectId, file, changeNote = 'Initial upload' }) => {
+      if (!documentId) {
+        return { data: null, error: new Error('Missing documentId') };
+      }
+
+      if (!projectId) {
+        return { data: null, error: new Error('Missing projectId') };
+      }
+
+      // 🔐 Upload (owner NICHT setzen!)
+      const filePath = await uploadDocumentFile({
+        organizationId,
+        projectId,
+        documentId,
+        file,
+        //userId: user?.id || null
+      });
+
+      const { data, error } = await createDocumentVersion({
+        documentId,
+        filePath,
+        changeNote,
+      });
+
+      if (!error && data) {
+        setVersions(prev => [data, ...prev]);
+      }
+
+      return { data, error };
+    },
+    [documentId]
+  );
 
   const loadComments = useCallback(async (versionId) => {
     const { data, error } = await getVersionComments(versionId);
@@ -95,9 +122,9 @@ export function useDocumentVersions(documentId) {
     return { data, error };
   }, [loadVersions]);
 
-  return { 
-    versions, loading, error, 
-    loadVersions, addVersion, uploadAndCreateVersion, 
+  return {
+    versions, loading, error,
+    loadVersions, addVersion, uploadAndCreateVersion,
     loadComments, addComment,
     getSignedUrl, downloadFile,
     removeOldVersions, revertToVersion
