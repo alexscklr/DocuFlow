@@ -48,12 +48,21 @@ export default function VersionCommentDialog({
         content: newComment.trim()
       });
 
-      if (!error && data) {
-        setComments(prev => [...prev, data]);
-        setNewComment('');
-        if (onCommentAdded) {
-          onCommentAdded();
-        }
+      if (error) {
+        console.error('Error adding comment:', error);
+        alert(`Error adding comment: ${error.message || error}`);
+        return;
+      }
+
+      // Clear the input immediately for better UX
+      setNewComment('');
+      
+      // Reload comments to ensure we have the latest data
+      // This handles cases where RPC might return data in different format
+      await loadComments();
+      
+      if (onCommentAdded) {
+        onCommentAdded();
       }
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -79,15 +88,20 @@ export default function VersionCommentDialog({
     try {
       const { data, error } = await updateVersionComment(commentId, editCommentText.trim());
       
-      if (!error && data) {
-        setComments(prev => prev.map(c => c.id === commentId ? data : c));
-        setEditingCommentId(null);
-        setEditCommentText('');
-        if (onCommentAdded) {
-          onCommentAdded();
-        }
-      } else {
+      if (error) {
+        console.error('Update error details:', error);
         alert(`Error updating comment: ${error?.message || error}`);
+        return;
+      }
+
+      // Always reload comments after update to ensure we have the latest data
+      // This handles cases where RLS policies might prevent the select from returning data
+      await loadComments();
+      setEditingCommentId(null);
+      setEditCommentText('');
+      
+      if (onCommentAdded) {
+        onCommentAdded();
       }
     } catch (error) {
       console.error('Error updating comment:', error);
@@ -136,7 +150,7 @@ export default function VersionCommentDialog({
             <div className="space-y-3">
               {comments.map((comment) => (
                 <div key={comment.id} className="border glass rounded p-3">
-                  <div className="flex justify-between items-start mb-2">
+                  <div className={`flex justify-between items-start ${editingCommentId === comment.id ? 'mb-4' : 'mb-2'}`}>
                     <p className="text-xs text-gray-400">
                       {new Date(comment.created_at).toLocaleString()}
                     </p>

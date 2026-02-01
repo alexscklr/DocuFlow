@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDocuments } from '@/shared/hooks/useDocuments';
 import { useDocumentVersions } from '@/shared/hooks/useDocumentVersions';
 import { useProjects } from '@/shared/hooks/useProjects';
-import { Modal, ActionButton, DocumentsUploadDialog, VersionCommentDialog } from '@/shared/components';
+import { Modal, ActionButton, DocumentsUploadDialog, VersionCommentDialog, DocumentStatusDialog } from '@/shared/components';
 import { uploadDocumentFile, createDocumentVersion, downloadVersionFile, getVersionComments } from '@/shared/lib/documentVersionsQueries';
+import { updateDocument } from '@/shared/lib/documentQueries';
 
 
 export function DocumentsPage() {
@@ -15,12 +16,14 @@ export function DocumentsPage() {
   const [project, setProject] = useState(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
   const [commentOpen, setCommentOpen] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [hoveredVersion, setHoveredVersion] = useState(null);
   const [hoverComments, setHoverComments] = useState({});
   const [uploading, setUploading] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const { documents, loadDocuments } = useDocuments(projectId);
   const { getProjectById } = useProjects(null);
@@ -155,6 +158,36 @@ export function DocumentsPage() {
     }
   };
 
+  const handleStatusUpdate = async ({ statusId }) => {
+    if (!documentId || !statusId) {
+      alert('Missing required information for status update');
+      return;
+    }
+
+    setUpdatingStatus(true);
+    try {
+      const { data, error } = await updateDocument(documentId, { status_id: statusId });
+      
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        // Update local document state
+        setDocument(prev => ({ ...prev, status_id: statusId }));
+        // Reload documents to get updated status
+        await loadDocuments();
+        alert('Document status updated successfully!');
+        setStatusOpen(false);
+      }
+    } catch (error) {
+      console.error('Error updating document status:', error);
+      alert(`Error updating document status: ${error.message || error}`);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   if (!document) {
     return (
       <div className="px-8 py-20">
@@ -185,6 +218,10 @@ export function DocumentsPage() {
             </p>
           </div>
           <div className="flex gap-4 shrink-0 self-end distance-bottom-sm">
+            <ActionButton
+              variant="status"
+              onClick={() => setStatusOpen(true)}
+            />
             <ActionButton
               variant="upload"
               onClick={() => setUploadOpen(true)}
@@ -324,6 +361,18 @@ export function DocumentsPage() {
             onCancel={() => setDownloadOpen(false)}
             submitLabel="Download"
             loading={downloading}
+          />
+        </Modal>
+
+        <Modal isOpen={statusOpen} onClose={() => setStatusOpen(false)}>
+          <DocumentStatusDialog
+            title="Select Document Status"
+            projectId={projectId}
+            currentStatusId={document?.status_id || null}
+            onSubmit={handleStatusUpdate}
+            onCancel={() => setStatusOpen(false)}
+            submitLabel="Save Status"
+            loading={updatingStatus}
           />
         </Modal>
 

@@ -28,7 +28,14 @@ export default function ProjectPage() {
 
   const { documents, addDocument, loadDocuments } = useDocuments(projectId);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
-  const { statuses } = useDocumentStatuses(projectId);
+  const { statuses, loadStatuses } = useDocumentStatuses(projectId);
+  
+  // Load statuses when projectId is available
+  useEffect(() => {
+    if (projectId) {
+      loadStatuses();
+    }
+  }, [projectId, loadStatuses]);
   
   // Load versions for all documents to get version numbers
   const [documentVersionsMap, setDocumentVersionsMap] = useState({});
@@ -70,9 +77,10 @@ export default function ProjectPage() {
 
   // Format documents for Table component
   const formattedDocuments = documents.map((doc) => {
-    // Get status name
+    // Get status with name and color
     const status = doc.status_id ? statuses.find(s => s.id === doc.status_id) : null;
     const state = status ? status.name : 'Draft';
+    const stateColor = status?.color || '#3b82f6'; // Default blue if no color
     
     // Get version number from latest version
     const latestVersion = documentVersionsMap[doc.id];
@@ -85,6 +93,7 @@ export default function ProjectPage() {
       ...doc,
       title: doc.title || 'Untitled Document',
       state,
+      stateColor,
       version,
       date,
     };

@@ -85,14 +85,38 @@ export async function addVersionComment({ version_id, content }) {
 
 // Update a version comment
 export async function updateVersionComment(commentId, content) {
-  const { data, error } = await supabase
-    .from('document_comments')
-    .update({ content })
-    .eq('id', commentId)
-    .select()
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('document_comments')
+      .update({ content })
+      .eq('id', commentId)
+      .select('*');
 
-  return { data, error };
+    if (error) {
+      console.error('Supabase update error:', error);
+      return { data: null, error };
+    }
+
+    // Handle response - could be array or single object
+    if (!data) {
+      console.error('No data returned from update. CommentId:', commentId);
+      return { data: null, error: new Error('No data returned from update') };
+    }
+
+    if (Array.isArray(data) && data.length === 0) {
+      console.error('Empty array returned from update. CommentId:', commentId);
+      // Update might have succeeded but RLS might prevent select, so return success
+      // The frontend will reload comments anyway
+      return { data: { id: commentId, content }, error: null };
+    }
+
+    // Return the first (and should be only) updated comment
+    const updatedComment = Array.isArray(data) ? data[0] : data;
+    return { data: updatedComment, error: null };
+  } catch (err) {
+    console.error('Exception in updateVersionComment:', err);
+    return { data: null, error: err };
+  }
 }
 
 // Delete a version comment

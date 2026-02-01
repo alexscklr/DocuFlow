@@ -51,7 +51,14 @@ export function Table({ data = [] }) {
                 <p className="text-sm text-gray-200">{item.title}</p>
               </div>
               <div className="text-left">
-                <span className="text-xs font-medium px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                <span 
+                  className="text-xs font-medium px-3 py-1 rounded-full border"
+                  style={{
+                    backgroundColor: item.stateColor ? `${item.stateColor}20` : 'rgba(59, 130, 246, 0.2)',
+                    color: item.stateColor || '#93c5fd',
+                    borderColor: item.stateColor ? `${item.stateColor}50` : 'rgba(59, 130, 246, 0.3)',
+                  }}
+                >
                   {item.state}
                 </span>
               </div>
