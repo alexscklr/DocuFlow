@@ -1,10 +1,19 @@
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  CloudUpload as UploadIcon,
+  CloudDownload as DownloadIcon,
+  Group as MembersIcon,
+} from '@mui/icons-material';
+
 const ICONS = {
-  add: '+',
-  edit: '✎',
-  delete: 'x',
-  upload: '↑',
-  download: '↓',
-  members: '👥',
+  add: <AddIcon fontSize="small" />,
+  edit: <EditIcon fontSize="small" />,
+  delete: <DeleteIcon fontSize="small" />,
+  upload: <UploadIcon fontSize="small" />,
+  download: <DownloadIcon fontSize="small" />,
+  members: <MembersIcon fontSize="small" />,
 };
 
 const STYLES = {
@@ -27,8 +36,6 @@ const STYLES = {
 export default function ActionButton({
   variant = 'add',
   onClick,
-
-  /** permissions */
   visible = true,
 }) {
   if (!visible) return null;
