@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDocuments } from '@/shared/hooks/useDocuments';
 import { useProjects } from '@/shared/hooks/useProjects';
 import { useDocumentStatuses } from '@/shared/hooks/useDocumentStatuses';
-import { Modal, EntityFormDialog, DokumentFormDialog, ActionButton, ConfirmDeleteDialog, MembersDialog } from '@/shared/components';
+import { Modal, EntityFormDialog, DokumentFormDialog, ActionButton, ConfirmDeleteDialog, MembersProjectDialog  } from '@/shared/components';
 import { Table } from '@/shared/components/TableProject/Table';
 
 export default function ProjectPage() {
@@ -15,7 +15,7 @@ export default function ProjectPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-
+  const [membersOpen, setMembersOpen] = useState(false);
   const { getProjectById, deleteProject, updateProject } = useProjects(null);
 
   useEffect(() => {
@@ -135,6 +135,7 @@ export default function ProjectPage() {
             <ActionButton variant="delete" onClick={() => setDeleteOpen(true)} />
             <ActionButton variant="edit" onClick={() => setEditOpen(true)} />
             <ActionButton variant="add" onClick={() => setCreateOpen(true)} />
+            <ActionButton variant="members" onClick={() => setMembersOpen(true)}/>
           </div>
         </div>
 
@@ -201,6 +202,15 @@ export default function ProjectPage() {
 
               setEditOpen(false);
             }}
+          />
+        </Modal>
+
+        <Modal isOpen={membersOpen} onClose={() => setMembersOpen(false)}>
+          <MembersProjectDialog
+            title="Project Members"
+            projectId={project.id}
+            onInvite={() => {}}
+            onClose={() => setMembersOpen(false)}
           />
         </Modal>
       </div>

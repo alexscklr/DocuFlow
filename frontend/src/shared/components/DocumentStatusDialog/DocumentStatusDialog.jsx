@@ -46,21 +46,21 @@ export default function DocumentStatusDialog({
               No statuses available
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 ">
               {statuses.map((status) => (
                 <button
                   key={status.id}
                   type="button"
                   onClick={() => setSelectedStatusId(status.id)}
                   className={`
-                    w-full px-4 py-3 rounded-lg border transition-colors text-left
+                    w-full px-4 py-3 rounded-lg border transition-colors text-left distance-bottom-sm
                     ${selectedStatusId === status.id
                       ? 'border-white/40 bg-white/10'
                       : 'border-white/10 bg-white/5 hover:bg-white/10'
                     }
                   `}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 ">
                     {status.color && (
                       <div
                         className="w-4 h-4 rounded-full flex-shrink-0"

@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import MembersInfo from '../MembersInfo/MembersInfo';
 import { getRoles } from '@/shared/lib/rolesQueries';
-import { useOrganizationMembers } from '@/shared/hooks/useOrganizationMembers';
-import { sendOrganizationInvite } from '@/shared/lib/inviteQueries';
+import { useProjectMembers } from '@/shared/hooks/useProjectMembers';
+import { sendProjectInvite } from "@/shared/lib/inviteQueries"; 
 import Dropdown from '../Dropdown/Dropdown';
 
 export const ROLE_LABELS = {
-  organization_owner: 'Owner',
-  organization_admin: 'Admin',
-  organization_moderator: 'Moderator',
-  organization_viewer: 'Viewer',
+  project_owner: 'Owner',
+  project_admin: 'Admin',
+  project_moderator: 'Moderator',
+  project_viewer: 'Viewer',
 };
 
-export default function MembersDialog({
+export default function MembersProjectDialog ({
   title,
   onClose,
   onInvite,
-  organizationId,
+  projectId,
   width = '600px',
   minHeiht = '600px',
   height = '800px',
@@ -28,7 +28,7 @@ export default function MembersDialog({
     error,
     loadMembers,
     updateMember
-  } = useOrganizationMembers(organizationId);
+  } = useProjectMembers(projectId);
 
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRoleId, setInviteRoleId] = useState('');
@@ -52,12 +52,12 @@ export default function MembersDialog({
   }, [loadMembers]);
 
   useEffect(() => {
-    if (!organizationId) return;
+    if (!projectId) return;
 
     const loadRoles = async () => {
       const { data } = await getRoles({
-        scope: 'organization',
-        organization_id: organizationId,
+        scope: 'project',
+        project_id: projectId,
       });
 
       const uiRoles = (data || []).map(role => ({
@@ -69,7 +69,7 @@ export default function MembersDialog({
     };
 
     loadRoles();
-  }, [organizationId]);
+  }, [projectId]);
 
   const handleInvite = async () => {
   if (!canInvite) return;
@@ -77,8 +77,8 @@ export default function MembersDialog({
   setInviteLoading(true);
   setInviteUrl(null);
 
-  const { data: token, error } = await sendOrganizationInvite({
-    organization_id: organizationId,
+  const { data: token, error } = await sendProjectInvite({
+    project_id: projectId,
     email: normalizedEmail,
     role_id: inviteRoleId,
   });

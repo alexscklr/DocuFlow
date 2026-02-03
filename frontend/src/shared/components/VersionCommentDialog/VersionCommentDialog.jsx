@@ -154,7 +154,7 @@ export default function VersionCommentDialog({
                     <p className="text-xs text-gray-400">
                       {new Date(comment.created_at).toLocaleString()}
                     </p>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 distance-bottom-sm">
                       {editingCommentId === comment.id ? (
                         <>
                           <button

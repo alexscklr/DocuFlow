@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppData } from '@/shared/context/AppDataContextBase';
 import { useProjects } from '@/shared/hooks/useProjects';
-import { Modal, EntityFormDialog, InfoFieldButton, ActionButton, ConfirmDeleteDialog, MembersDialog } from '@/shared/components';
+import { Modal, EntityFormDialog, InfoFieldButton, ActionButton, ConfirmDeleteDialog, MembersOrganisationDialog } from '@/shared/components';
 
 
 export default function ProjectsPage() {
@@ -139,7 +139,7 @@ export default function ProjectsPage() {
         </Modal>
         
         <Modal isOpen={membersOpen} onClose={() => setMembersOpen(false)}>
-          <MembersDialog
+          <MembersOrganisationDialog
             title="Organisation Members"
             organizationId={org.id}
             onInvite={() => {}}

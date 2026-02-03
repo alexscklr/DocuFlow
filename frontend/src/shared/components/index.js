@@ -9,6 +9,8 @@ export { default as DocumentStatusDialog } from './DocumentStatusDialog/Document
 export { default as Modal } from './Modal/Modal';
 export { default as ActionButton } from './ActionButton/ActionButton';
 export { default as ConfirmDeleteDialog } from './ConfirmDeleteDialog/ConfirmDeleteDialog';
-export { default as MembersDialog } from './MembersDialog/MembersDialog';
+export { default as MembersOrganisationDialog } from './MembersOrganisationDialog/MembersOrganisationDialog';
 export { default as MembersInfo } from './MembersInfo/MembersInfo';
 export { default as Dropdown } from './Dropdown/Dropdown';
+export { default as MembersProjectDialog } from './MembersProjectDialog/MembersProjectDialog';
+export { default as RolesManager } from './RolesManager/RolesManager';  
