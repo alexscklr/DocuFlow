@@ -91,7 +91,7 @@ export default function RolesManager ({
     const hasPermission = rolePermissionIds.has(permissionId);
 
     if (hasPermission) {
-      const { error } = await removePermissionFromRole(permissionId);
+      const { error } = await removePermissionFromRole(selectedRoleId, permissionId);
       if (!error) {
         setRolePermissions(prev =>
           prev.filter(rp => rp.permission_id !== permissionId)
