@@ -22,6 +22,7 @@ export default function RolesManager ({
     width = '600px',
     minHeiht = '600px',
     height = '800px',
+    onRolesChanged,
 }) {
 
   const [roles, setRoles] = useState([]);
@@ -138,6 +139,8 @@ export default function RolesManager ({
 
     setRoles(prev => [...prev, data]);
     setNewRole({ name: '', description: '' });
+
+    onRolesChanged?.();
   };
 
   const removeRole = async (roleId) => {

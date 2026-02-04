@@ -42,6 +42,18 @@ export default function MemberDocumentsDialog({
 
   const { profile: myProfile } = useAppData();
   
+  const loadRoles = async () => {
+    const { data } = await getRoles({
+      scope: 'document',
+      project_id: projectId,
+    });
+    setRoles(data || []);
+  };
+
+  useEffect(() => {
+    if (projectId) loadRoles();
+  }, [projectId]);
+
   useEffect(() => {
     if (projectId) loadMembers();
   }, [projectId, loadMembers]);
@@ -190,6 +202,7 @@ export default function MemberDocumentsDialog({
           projectId={projectId}
           documentId={documentId}
           onBack={() => setView('members')}
+          onRolesChanged={loadRoles}
         />
       )}
     </div>
