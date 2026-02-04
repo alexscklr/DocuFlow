@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getVersionComments, addVersionComment, updateVersionComment, deleteVersionComment } from '@/shared/lib/documentVersionsQueries';
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 
 export default function VersionCommentDialog({
   width = '520px',
@@ -180,7 +184,7 @@ export default function VersionCommentDialog({
                             className="w-6 h-6 border glass rounded-full flex items-center justify-center text-sm text-blue-300 hover:bg-blue-500/10 transition-colors"
                             title="Edit"
                           >
-                            ✎
+                            {<EditIcon fontSize="small" />}
                           </button>
                           <button
                             onClick={() => handleDelete(comment.id)}
@@ -188,7 +192,7 @@ export default function VersionCommentDialog({
                             className="w-6 h-6 border glass rounded-full flex items-center justify-center text-sm text-red-300 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
                             title="Delete"
                           >
-                            {deleting === comment.id ? '…' : 'x'}
+                            {deleting === comment.id ? '…' : <DeleteIcon fontSize="small" />}
                           </button>
                         </>
                       )}

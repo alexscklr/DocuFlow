@@ -3,6 +3,8 @@ import MembersInfo from '../MembersInfo/MembersInfo';
 import { getRoles } from '@/shared/lib/rolesQueries';
 import { useDocumentShares } from '@/shared/hooks/useDocumentShares';
 import { useProjectMembers } from '@/shared/hooks/useProjectMembers';
+import { UserDropdown } from '..';
+import { useAppData } from '@/shared/context/AppDataContextBase';
 import Dropdown from '../Dropdown/Dropdown';
 import { RolesManager } from '@/shared/components';
 import { Settings as SettingsIcon } from '@mui/icons-material';
@@ -37,6 +39,8 @@ export default function MemberDocumentsDialog({
   const [selectedUserId, setSelectedUserId] = useState('');
   const [selectedRoleId, setSelectedRoleId] = useState('');
   const [sharing, setSharing] = useState(false);
+
+  const { profile: myProfile } = useAppData();
   
   useEffect(() => {
     if (projectId) loadMembers();
@@ -71,15 +75,23 @@ export default function MemberDocumentsDialog({
 
 
   const sharedUserIds = shares.map(s => s.user_id);
-  const availableMembers = members.filter(
-    m => !sharedUserIds.includes(m.user_id)
-  );
   
+  const availableMembers = members.filter(m =>
+    !sharedUserIds.includes(m.user_id) &&
+    m.user_id !== myProfile?.user_id
+  );
+    
   const roleOptions = roles.map(role => ({
     id: role.id,
     label: role.name, 
-}));
+  }));
 
+  const userOptions = availableMembers.map(m => ({
+    id: m.user_id,
+    label: m.display_name || m.email || m.user_id,
+  }));
+
+  
   const handleShare = async () => {
     if (!selectedUserId) return;
 
@@ -119,18 +131,11 @@ export default function MemberDocumentsDialog({
 
           {/* SHARE FORM */}
           <div className="w-full flex gap-2 distance-bottom-sm">
-            <select
+            <UserDropdown
               value={selectedUserId}
-              onChange={(e) => setSelectedUserId(e.target.value)}
-              className="glass w-full px-3 py-2 text-sm bg-transparent outline-none"
-            >
-              <option value="">Select project member</option>
-              {availableMembers.map(m => (
-                <option key={m.user_id} value={m.user_id}>
-                  {m.display_name || m.email || m.user_id}
-                </option>
-              ))}
-            </select>
+              users={userOptions}
+              onChange={setSelectedUserId}
+            />
 
             <Dropdown
               className="dropdown-fit"

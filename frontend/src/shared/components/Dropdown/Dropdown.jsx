@@ -33,7 +33,7 @@ export default function Dropdown({ value, roles, onChange , variant }) {
 
     const rect = btnRef.current.getBoundingClientRect();
 
-    const padding = 32; // arrow + paddings
+    const padding = 32;
     const finalWidth = Math.max(
       rect.width,
       longestLabelWidth + padding
