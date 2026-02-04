@@ -107,7 +107,7 @@ export function ProfilePage() {
             <h2 className="text-xl font-semibold flex items-center gap-2 distance-bottom-md"> <span>🗂️</span> Projects </h2>
 
             <div className="grid grid-cols-2 gap-4">
-              {projects.length === 0 ? (
+              {projects && projects.length === 0 ? (
                 <p className="text-gray-400 col-span-2">
                   You don’t have any current projects.
                 </p>
