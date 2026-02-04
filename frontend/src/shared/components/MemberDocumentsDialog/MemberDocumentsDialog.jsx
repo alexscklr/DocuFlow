@@ -28,7 +28,7 @@ export default function MemberDocumentsDialog({
   height = '800px',
 }) {
 
-  const { members, loadMembers } = useProjectMembers(projectId);
+  const { members, loadMembers, updateMember } = useProjectMembers(projectId);
   const { shares, loading, error, loadShares, addShare, removeShare } = useDocumentShares(documentId);
 
   const [roles, setRoles] = useState([]);
@@ -76,7 +76,7 @@ export default function MemberDocumentsDialog({
   );
   
   const roleOptions = roles.map(role => ({
-    value: role.id,
+    id: role.id,
     label: role.name, 
 }));
 
@@ -87,7 +87,7 @@ export default function MemberDocumentsDialog({
 
     const { error } = await addShare({
       userId: selectedUserId,
-      roleId: selectedRoleId || null, // ← ВОТ ТУТ роль
+      roleId: selectedRoleId || null,
     });
 
     setSharing(false);
@@ -170,7 +170,7 @@ export default function MemberDocumentsDialog({
               <MembersInfo
                 key={member.id}
                 member={member}
-                roles={roles}
+                roles={roleOptions}
                 onRoleChange={handleRoleChange}
               />
             ))}
