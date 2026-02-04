@@ -62,30 +62,6 @@ export default function MemberDocumentsDialog({
     if (documentId) loadShares();
   }, [documentId, loadShares]);
 
-  useEffect(() => {
-    let isActive = true;
-
-    if (!projectId) return;
-
-    const loadRoles = async () => {
-      const { data } = await getRoles({
-        scope: 'document',
-        project_id: projectId,
-      });
-
-      if (!isActive) return; 
-
-      setRoles(data || []);
-    };
-
-    loadRoles();
-
-    return () => {
-      isActive = false; 
-    };
-  }, [projectId]);
-
-
   const sharedUserIds = shares.map(s => s.user_id);
   
   const availableMembers = members.filter(m =>

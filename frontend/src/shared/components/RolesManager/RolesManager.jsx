@@ -47,7 +47,7 @@ export default function RolesManager ({
         scope,
         organization_id: organizationId,
         project_id: projectId,
-        document_id: documentId, // ✅ ДОБАВИЛИ
+        document_id: documentId, 
       });
 
       if (error) {
@@ -154,8 +154,10 @@ export default function RolesManager ({
 
     if (selectedRoleId === roleId) {
       setSelectedRoleId(null);
-      setRolePermissions([]); // если используешь permissions
+      setRolePermissions([]); 
     }
+
+    onRolesChanged?.();
   };
 
   return (

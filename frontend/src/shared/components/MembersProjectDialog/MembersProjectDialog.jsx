@@ -42,30 +42,30 @@ export default function MembersProjectDialog({
   const normalizedEmail = inviteEmail.trim();
   const canInvite = Boolean(inviteRoleId && normalizedEmail && !inviteLoading);
 
+  const loadRoles = async () => {
+    if (!projectId) return;
+
+    const { data } = await getRoles({
+      scope: 'project',
+      project_id: projectId,
+    });
+
+    setRoles(
+      (data || []).map(role => ({
+        id: role.id,
+        label: ROLE_LABELS[role.name] ?? role.name,
+      }))
+    );
+  };
+
+  useEffect(() => {
+    loadRoles();
+  }, [projectId]);
+
   useEffect(() => {
     loadMembers();
   }, [loadMembers]);
-
-   useEffect(() => {
-      if (!projectId) return;
-  
-      const loadRoles = async () => {
-        const { data } = await getRoles({
-          scope: 'project',
-          project_id: projectId,
-        });
-  
-        setRoles(
-          (data || []).map(role => ({
-            id: role.id,
-            label: ROLE_LABELS[role.name] ?? role.name,
-          }))
-        );
-      };
-  
-      loadRoles();
-    }, [projectId]);
-  
+   
   const handleRoleChange = async (member, newRoleId) => {
     if (member.role_id === newRoleId) return;
     await updateMember(member.id, { role_id: newRoleId });
@@ -180,6 +180,7 @@ export default function MembersProjectDialog({
           scope="project"
           projectId={projectId}
           onBack={() => setView('members')}
+          onRolesChanged={loadRoles}
         />
       )}
     </div>

@@ -42,6 +42,26 @@ export default function MembersOrganisationDialog({
   const normalizedEmail = inviteEmail.trim();
   const canInvite = Boolean(inviteRoleId && normalizedEmail && !inviteLoading);
 
+  const loadRoles = async () => {
+    if (!organizationId) return;
+
+    const { data } = await getRoles({
+      scope: 'organization',
+      organization_id: organizationId,
+    });
+
+    setRoles(
+      (data || []).map(role => ({
+        id: role.id,
+        label: ROLE_LABELS[role.name] ?? role.name,
+      }))
+    );
+  };
+
+  useEffect(() => {
+    loadRoles();
+  }, [organizationId]);
+
   useEffect(() => {
     loadMembers();
   }, [loadMembers]);
@@ -179,6 +199,7 @@ export default function MembersOrganisationDialog({
           scope="organization"
           organizationId={organizationId}
           onBack={() => setView('members')}
+          onRolesChanged={loadRoles}
         />
       )}
     </div>
