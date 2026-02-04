@@ -1,5 +1,16 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+
+
+function measureTextWidth(text, font) {
+  const canvas =
+    measureTextWidth.canvas ||
+    (measureTextWidth.canvas = document.createElement('canvas'));
+
+  const context = canvas.getContext('2d');
+  context.font = font;
+  return context.measureText(text).width;
+}
 
 export default function Dropdown({ value, roles, onChange , variant }) {
   const [open, setOpen] = useState(false);
@@ -8,17 +19,32 @@ export default function Dropdown({ value, roles, onChange , variant }) {
 
   const current = roles.find(r => r.id === value);
 
+  const longestLabelWidth = useMemo(() => {
+    return roles.reduce((max, r) => {
+      return Math.max(
+        max,
+        measureTextWidth(r.label, '12px system-ui')
+      );
+    }, 0);
+  }, [roles]);
+
   useEffect(() => {
     if (!open || !btnRef.current) return;
 
     const rect = btnRef.current.getBoundingClientRect();
 
+    const padding = 32; // arrow + paddings
+    const finalWidth = Math.max(
+      rect.width,
+      longestLabelWidth + padding
+    );
+
     setPos({
       top: rect.bottom + 6,
       left: rect.left,
-      width: rect.width,
+      width: finalWidth,
     });
-  }, [open]);
+  }, [open, longestLabelWidth]);
 
   useEffect(() => {
     if (!open) return;

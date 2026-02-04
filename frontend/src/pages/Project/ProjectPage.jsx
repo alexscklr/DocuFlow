@@ -123,7 +123,7 @@ export default function ProjectPage() {
         <div className="flex items-center justify-between gap-8">
           <div className="flex-1 min-w-0">
             <h1 className="text-4xl font-semibold text-left distance-bottom-sm">
-              Documents in {project.name}
+              Project - {project.name}
             </h1>
 
             <p className="text-2xs font-semibold text-left truncate max-w-[60ch]">

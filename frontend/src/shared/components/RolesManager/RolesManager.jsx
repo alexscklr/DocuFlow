@@ -33,13 +33,20 @@ export default function RolesManager ({
   const [loadingPerms, setLoadingPerms] = useState(false);
 
   useEffect(() => {
-    if (!organizationId && !projectId) return;
+    if (
+      (scope === 'organization' && !organizationId) ||
+      (scope === 'project' && !projectId) ||
+      (scope === 'document' && (!projectId || !documentId))
+    ) {
+      return;
+    }
 
     const loadRoles = async () => {
       const { data, error } = await getRoles({
         scope,
         organization_id: organizationId,
         project_id: projectId,
+        document_id: documentId, // ✅ ДОБАВИЛИ
       });
 
       if (error) {

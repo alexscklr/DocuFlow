@@ -6,6 +6,7 @@ import { useProjects } from '@/shared/hooks/useProjects';
 import { Modal, ActionButton, DocumentsUploadDialog, VersionCommentDialog, DocumentStatusDialog } from '@/shared/components';
 import { uploadDocumentFile, createDocumentVersion, downloadVersionFile, getVersionComments } from '@/shared/lib/documentVersionsQueries';
 import { updateDocument } from '@/shared/lib/documentQueries';
+import { MemberDocumentsDialog } from '../../shared/components';
 
 
 export function DocumentsPage() {
@@ -27,6 +28,9 @@ export function DocumentsPage() {
 
   const { documents, loadDocuments } = useDocuments(projectId);
   const { getProjectById } = useProjects(null);
+
+  const [membersOpen, setMembersOpen] = useState(false);
+  
   
   // Get versions for the document
   const { versions, loadVersions } = useDocumentVersions(documentId);
@@ -211,7 +215,7 @@ export function DocumentsPage() {
         <div className="flex items-center justify-between gap-8">
           <div className="flex-1 min-w-0">
             <h1 className="text-4xl text-left font-semibold distance-bottom-sm">
-              {document.title || 'Untitled Document'}
+              Document - {document.title || 'Untitled Document'}
             </h1>
             <p className="text-2xs font-semibold text-left truncate max-w-[60ch]">
               {project?.name || 'No project'} • Created: {document.created_at ? new Date(document.created_at).toLocaleDateString() : 'N/A'}
@@ -230,6 +234,7 @@ export function DocumentsPage() {
               variant="download"
               onClick={() => setDownloadOpen(true)}
             />
+            <ActionButton variant="members" onClick={() => setMembersOpen(true)}/>
           </div>
         </div>
 
@@ -402,6 +407,16 @@ export function DocumentsPage() {
               }}
             />
           )}
+        </Modal>
+
+        <Modal isOpen={membersOpen} onClose={() => setMembersOpen(false)}>
+          <MemberDocumentsDialog
+            title="Document Members"
+            documentId={document.id}
+            projectId={projectId}
+            onInvite={() => {}}
+            onClose={() => setMembersOpen(false)}
+          />
         </Modal>
       </div>
     </div>

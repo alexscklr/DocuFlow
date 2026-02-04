@@ -14,3 +14,4 @@ export { default as MembersInfo } from './MembersInfo/MembersInfo';
 export { default as Dropdown } from './Dropdown/Dropdown';
 export { default as MembersProjectDialog } from './MembersProjectDialog/MembersProjectDialog';
 export { default as RolesManager } from './RolesManager/RolesManager';  
+export { default as MemberDocumentsDialog } from './MemberDocumentsDialog/MemberDocumentsDialog';   

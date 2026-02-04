@@ -54,7 +54,7 @@ export default function ProjectsPage() {
        <div className="flex items-center justify-between gap-8">
           <div className="flex-1 min-w-0">
             <h1 className="text-4xl font-semibold text-left distance-bottom-sm">
-              Projects in {org.name}
+              Organisation - {org.name}
             </h1>
 
             <p className="text-2xs font-semibold text-left truncate max-w-[60ch]">
