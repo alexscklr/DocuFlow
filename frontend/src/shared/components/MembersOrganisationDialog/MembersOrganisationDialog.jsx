@@ -30,6 +30,7 @@ export default function MembersOrganisationDialog({
     members,
     loadMembers,
     updateMember,
+    removeMember,
   } = useOrganizationMembers(organizationId);
 
   const [inviteEmail, setInviteEmail] = useState('');
@@ -187,6 +188,7 @@ export default function MembersOrganisationDialog({
                 member={member}
                 roles={roles}
                 onRoleChange={handleRoleChange}
+                onRemove={() => removeMember(member.id)}
               />
             ))}
           </div>

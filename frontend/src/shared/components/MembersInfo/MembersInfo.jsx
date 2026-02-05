@@ -1,10 +1,12 @@
 import React from 'react';
 import Dropdown from '../Dropdown/Dropdown.jsx';
+import { Delete as DeleteIcon } from '@mui/icons-material';
 
 export default function MembersInfo({
     member,
     roles,
     onRoleChange,
+    onRemove
 }) {
 
   return (
@@ -37,14 +39,32 @@ export default function MembersInfo({
                 </span>
             </div>
         </div>
-
-        <Dropdown
-            value={member.role_id}
-            roles={roles}
-            onChange={(newRoleId) =>
-            onRoleChange(member, newRoleId)
-            }
-        />
+        
+        <div className='flex items-center gap-2'>
+          {onRoleChange ? (
+            <Dropdown
+              value={member.role_id}
+              roles={roles}
+              onChange={(newRoleId) =>
+                onRoleChange(member, newRoleId)
+              }
+            />
+            ) : (
+              <span className="text-sm text-white/70 px-2">
+                {roles?.find(r => r.id === member.role_id)?.label ?? '—'}
+              </span>
+          )}
+        
+          <button
+              onClick={() => onRemove()}
+              className="glass-btn" 
+              title="Remove member"
+          >
+              <DeleteIcon fontSize="small" />
+          </button>
+        </div>
+       
+        
     </div>
   );
 }

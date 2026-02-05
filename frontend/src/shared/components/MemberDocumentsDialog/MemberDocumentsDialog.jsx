@@ -30,7 +30,7 @@ export default function MemberDocumentsDialog({
   height = '800px',
 }) {
 
-  const { members, loadMembers, updateMember } = useProjectMembers(projectId);
+  const { members, loadMembers, updateMember, removeMember } = useProjectMembers(projectId);
   const { shares, loading, error, loadShares, addShare, removeShare } = useDocumentShares(documentId);
 
   const [roles, setRoles] = useState([]);
@@ -79,6 +79,17 @@ export default function MemberDocumentsDialog({
     label: m.display_name || m.email || m.user_id,
   }));
 
+  const sharesWithUsers = shares.map(share => {
+    const user = members.find(m => m.user_id === share.user_id);
+
+    return {
+      ...share,
+      display_name: user?.display_name,
+      avatar_url: user?.avatar_url,
+      user_id: share.user_id,
+      role_id: share.role_id,
+    };
+  });
   
   const handleShare = async () => {
     if (!selectedUserId) return;
@@ -159,12 +170,12 @@ export default function MemberDocumentsDialog({
           </div>
           
           <div className="mt-6 max-h-[600px] overflow-y-auto no-scrollbar">
-            {members.map(member => (
+            {sharesWithUsers.map(share  => (
               <MembersInfo
-                key={member.id}
-                member={member}
+                key={share.id}
+                member={share}
                 roles={roleOptions}
-                onRoleChange={handleRoleChange}
+                onRemove={() => removeShare(share.id)}
               />
             ))}
           </div>

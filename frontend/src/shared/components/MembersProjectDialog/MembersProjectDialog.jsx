@@ -30,6 +30,7 @@ export default function MembersProjectDialog({
     members,
     loadMembers,
     updateMember,
+    removeMember,
   } = useProjectMembers(projectId);
 
   const [inviteEmail, setInviteEmail] = useState('');
@@ -168,6 +169,7 @@ export default function MembersProjectDialog({
                 member={member}
                 roles={roles}
                 onRoleChange={handleRoleChange}
+                onRemove={() => removeMember(member.id)}
               />
             ))}
           </div>
