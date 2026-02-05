@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAppData } from '@/shared/context/AppDataContextBase';
 import { useProjects } from '@/shared/hooks/useProjects';
 import { Modal, EntityFormDialog, InfoFieldButton, ActionButton, ConfirmDeleteDialog, MembersOrganisationDialog } from '@/shared/components';
+import { getPermissionsOfUser, hasPermission as checkPermission } from '@/shared/lib/rolesQueries';
 
 
 export default function ProjectsPage() {
@@ -40,7 +41,25 @@ export default function ProjectsPage() {
     );
   }
 
-  const { hasPermission } = useAppData();
+  const { hasPermission: ctxHasPermission } = useAppData();
+
+  // Fetch fresh permissions locally to ensure buttons update
+  const [localPermissions, setLocalPermissions] = useState(null);
+
+  useEffect(() => {
+    async function loadPermissions() {
+      const { data } = await getPermissionsOfUser();
+      if (data) setLocalPermissions(data);
+    }
+    loadPermissions();
+  }, [orgId]);
+
+  const hasPermission = (id, scope, permission) => {
+    if (localPermissions) {
+      return checkPermission(localPermissions, id, scope, permission);
+    }
+    return ctxHasPermission(id, scope, permission);
+  };
 
   const permissions = {
     editOrg: hasPermission(org.id, 'organization', 'edit'),

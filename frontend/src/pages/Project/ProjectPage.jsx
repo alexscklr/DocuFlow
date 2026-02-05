@@ -6,6 +6,7 @@ import { useProjects } from '@/shared/hooks/useProjects';
 import { useDocumentStatuses } from '@/shared/hooks/useDocumentStatuses';
 import { Modal, EntityFormDialog, DokumentFormDialog, ActionButton, ConfirmDeleteDialog, MembersProjectDialog  } from '@/shared/components';
 import { Table } from '@/shared/components/TableProject/Table';
+import { getPermissionsOfUser, hasPermission as checkPermission } from '@/shared/lib/rolesQueries';
 
 export default function ProjectPage() {
   const { projectId } = useParams();
