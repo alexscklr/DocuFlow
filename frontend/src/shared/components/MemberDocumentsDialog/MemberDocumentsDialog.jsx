@@ -66,7 +66,7 @@ export default function MemberDocumentsDialog({
   
   const availableMembers = members.filter(m =>
     !sharedUserIds.includes(m.user_id) &&
-    m.user_id !== myProfile?.user_id
+    m.user_id !== myProfile?.id
   );
     
   const roleOptions = roles.map(role => ({
@@ -110,11 +110,6 @@ export default function MemberDocumentsDialog({
 
     setSelectedUserId('');
     setSelectedRoleId('');
-  };
-
-  const handleRoleChange = async (member, newRoleId) => {
-    if (member.role_id === newRoleId) return;
-    await updateMember(member.id, { role_id: newRoleId });
   };
 
   return (

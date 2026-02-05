@@ -8,19 +8,29 @@ import { Modal, EntityFormDialog,} from '@/shared/components';
 import { uploadAvatar } from '@/shared/lib/profileQueries';
 
 export function ProfilePage() {
-  const { profileId } = useParams();
+   const { profileId } = useParams();
   const { profile: myProfile, updateProfile } = useAppData();
   const [editOpen, setEditOpen] = useState(false);
 
-  const isOwnProfile = myProfile && profileId === myProfile.id;
-  const { profilesMap } = useProfilesByIds(isOwnProfile ? [] : [profileId]);
-  const profileIdToUse = isOwnProfile ? myProfile.id : profileId;
+  const { profilesMap } = useProfilesByIds(
+    profileId ? [profileId] : []
+  );
 
-  const { projects, loading } = useUserProjects(profileIdToUse);
+  const isOwnProfile = Boolean(myProfile && profileId === myProfile.id);
 
-  const profileToShow = isOwnProfile ? myProfile : profilesMap[profileId];
-  if (!myProfile) return null;
-  if (!profileToShow) return <div>Loading profile…</div>;
+  const profileToShow = isOwnProfile
+    ? myProfile
+    : profilesMap[profileId];
+
+  const profileIdToUse = isOwnProfile
+    ? myProfile?.id
+    : profileId;
+
+  const { projects = [], loading } = useUserProjects(profileIdToUse);
+
+  if (!profileToShow) {
+    return <div>Loading profile…</div>;
+  }
 
   const handleAvatarChange = async (event) => {
     const file = event.target.files?.[0];
@@ -112,7 +122,7 @@ export function ProfilePage() {
                   You don’t have any current projects.
                 </p>
               ) : (
-                projects.map(p => (
+              projects.map(p => (
                   <ProjectField
                     key={p.id}
                     projectName={p.project.name}
