@@ -65,8 +65,9 @@ export default function MemberDocumentsDialog({
   const sharedUserIds = shares.map(s => s.user_id);
   
   const availableMembers = members.filter(m =>
-    !sharedUserIds.includes(m.user_id) &&
-    m.user_id !== myProfile?.id
+    !sharedUserIds.includes(m.user_id) 
+    /*&&
+    m.user_id !== myProfile?.id*/
   );
     
   const roleOptions = roles.map(role => ({
