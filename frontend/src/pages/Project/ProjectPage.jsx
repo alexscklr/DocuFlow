@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDocuments } from '@/shared/hooks/useDocuments';
+import { useAppData } from '@/shared/context/AppDataContextBase';
 import { useProjects } from '@/shared/hooks/useProjects';
 import { useDocumentStatuses } from '@/shared/hooks/useDocumentStatuses';
 import { Modal, EntityFormDialog, DokumentFormDialog, ActionButton, ConfirmDeleteDialog, MembersProjectDialog  } from '@/shared/components';
@@ -9,6 +10,8 @@ import { Table } from '@/shared/components/TableProject/Table';
 export default function ProjectPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
+
+  const { hasPermission } = useAppData();
 
   const [project, setProject] = useState(null);
 
@@ -109,6 +112,18 @@ export default function ProjectPage() {
     );
   }
 
+  const permissions = {
+    read: hasPermission(project.id, 'project', 'read'),
+    edit: hasPermission(project.id, 'project', 'edit'),
+    delete: hasPermission(project.id, 'project', 'delete'),
+    createDocument:
+      hasPermission(project.id, 'project', 'create_document') ||
+      hasPermission(project.id, 'project', 'manage_documents'),
+    manageMembers:
+      hasPermission(project.id, 'project', 'invite_member') ||
+      hasPermission(project.id, 'project', 'manage_roles'),
+  };
+
   return (
     <div className="h-screen text-[var(--color-text)]">
       <div
@@ -132,10 +147,10 @@ export default function ProjectPage() {
           </div>
 
           <div className="flex gap-4 shrink-0 self-end distance-bottom-sm">
-            <ActionButton variant="delete" onClick={() => setDeleteOpen(true)} />
-            <ActionButton variant="edit" onClick={() => setEditOpen(true)} />
-            <ActionButton variant="add" onClick={() => setCreateOpen(true)} />
-            <ActionButton variant="members" onClick={() => setMembersOpen(true)}/>
+            <ActionButton variant="delete" disabled={!permissions.delete} onClick={() => setDeleteOpen(true)} />
+            <ActionButton variant="edit" disabled={!permissions.edit} onClick={() => setEditOpen(true)} />
+            <ActionButton variant="add" disabled={!permissions.createDocument} onClick={() => setCreateOpen(true)} />
+            <ActionButton variant="members" disabled={!permissions.manageMembers} onClick={() => setMembersOpen(true)}/>
           </div>
         </div>
 

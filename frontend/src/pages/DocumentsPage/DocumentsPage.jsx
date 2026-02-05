@@ -3,11 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDocuments } from '@/shared/hooks/useDocuments';
 import { useDocumentVersions } from '@/shared/hooks/useDocumentVersions';
 import { useProjects } from '@/shared/hooks/useProjects';
-import { Modal, ActionButton, DocumentsUploadDialog, VersionCommentDialog, DocumentStatusDialog } from '@/shared/components';
+import { Modal, ActionButton, DocumentsUploadDialog, VersionCommentDialog, DocumentStatusDialog, ConfirmDeleteDialog } from '@/shared/components';
 import { uploadDocumentFile, createDocumentVersion, downloadVersionFile, getVersionComments } from '@/shared/lib/documentVersionsQueries';
 import { updateDocument } from '@/shared/lib/documentQueries';
 import { MemberDocumentsDialog } from '../../shared/components';
-
+import { useAppData } from '@/shared/context/AppDataContextBase';
 
 export function DocumentsPage() {
   const { orgId, projectId, documentId } = useParams();
@@ -25,12 +25,13 @@ export function DocumentsPage() {
   const [uploading, setUploading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
-
-  const { documents, loadDocuments } = useDocuments(projectId);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  
+  const { documents, loadDocuments, removeDocument } = useDocuments(projectId);
   const { getProjectById } = useProjects(null);
 
   const [membersOpen, setMembersOpen] = useState(false);
-  
+  const { hasPermission } = useAppData();
   
   // Get versions for the document
   const { versions, loadVersions } = useDocumentVersions(documentId);
@@ -201,6 +202,18 @@ export function DocumentsPage() {
     );
   }
 
+  const permissions = {
+    read: hasPermission(document.id, 'document', 'read'),
+    upload: hasPermission(document.id, 'document', 'upload'),
+    edit: hasPermission(document.id, 'document', 'edit'),
+    share:
+      hasPermission(document.id, 'document', 'share') ||
+      hasPermission(document.id, 'document', 'manage_roles'),
+    comment: hasPermission(document.id, 'document', 'create_comment'),
+    history: hasPermission(document.id, 'document', 'version_history'),
+    delete: hasPermission(document.id, 'document', 'delete'),
+  }
+
   return (
     <div className="h-screen text-[var(--color-text)]">
       <div
@@ -222,12 +235,16 @@ export function DocumentsPage() {
             </p>
           </div>
           <div className="flex gap-4 shrink-0 self-end distance-bottom-sm">
+            <ActionButton variant="delete" disabled={!permissions.delete} onClick={() => setDeleteOpen(true)} />
+            
             <ActionButton
               variant="status"
+              disabled={!permissions.edit}
               onClick={() => setStatusOpen(true)}
             />
             <ActionButton
               variant="upload"
+              disabled={!permissions.upload}
               onClick={() => setUploadOpen(true)}
             />
             <ActionButton
@@ -416,6 +433,17 @@ export function DocumentsPage() {
             projectId={projectId}
             onInvite={() => {}}
             onClose={() => setMembersOpen(false)}
+          />
+        </Modal>
+
+        <Modal isOpen={deleteOpen} onClose={() => setDeleteOpen(false)}>
+          <ConfirmDeleteDialog
+            text={`Delete Document "${document.title}"?`}
+            onCancel={() => setDeleteOpen(false)}
+            onConfirm={async () => {
+              await removeDocument(document.id);
+              navigate(-1);
+            }}
           />
         </Modal>
       </div>

@@ -40,6 +40,7 @@ export default function ActionButton({
   variant = 'add',
   onClick,
   visible = true,
+  disabled = false,
 }) {
   if (!visible) return null;
 
@@ -50,6 +51,7 @@ export default function ActionButton({
       className={`
         ${STYLES.base}
         ${STYLES[variant]}
+        ${disabled ? 'opacity-40 cursor-not-allowed pointer-events-none' : ''}
       `}
     >
       {ICONS[variant]}

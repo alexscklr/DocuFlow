@@ -40,6 +40,17 @@ export default function ProjectsPage() {
     );
   }
 
+  const { hasPermission } = useAppData();
+
+  const permissions = {
+    editOrg: hasPermission(org.id, 'organization', 'edit'),
+    deleteOrg: hasPermission(org.id, 'organization', 'delete'),
+    createProject: hasPermission(org.id, 'organization', 'create_project'),
+    manageMembers:
+      hasPermission(org.id, 'organization', 'invite_member') ||
+      hasPermission(org.id, 'organization', 'manage_roles'),
+  };
+
   return (
    <div className="h-screen text-[var(--color-text)]">
       <div
@@ -63,10 +74,10 @@ export default function ProjectsPage() {
           </div>
 
           <div className="flex gap-4 shrink-0 self-end distance-bottom-xs">
-            <ActionButton variant="delete" onClick={() => setDeleteOrgOpen(true)} />
-            <ActionButton variant="edit" onClick={() => setEditOrgOpen(true)} />
-            <ActionButton variant="add" onClick={() => setCreateProjectOpen(true)} />
-            <ActionButton variant="members" onClick={() => setMembersOpen(true)}/>
+            <ActionButton variant="delete" disabled={!permissions.deleteOrg} onClick={() => setDeleteOrgOpen(true)} />
+            <ActionButton variant="edit" disabled={!permissions.editOrg} onClick={() => setEditOrgOpen(true)} />
+            <ActionButton variant="add" disabled={!permissions.createProject} onClick={() => setCreateProjectOpen(true)} />
+            <ActionButton variant="members" disabled={!permissions.manageMembers} onClick={() => setMembersOpen(true)}/>
           </div>
         </div>
         <hr className="border-white/20 distance-bottom-md" />
@@ -82,8 +93,6 @@ export default function ProjectsPage() {
           />
           ))}
         </section>
-
-        
 
         <Modal isOpen={deleteOrgOpen} onClose={() => setDeleteOrgOpen(false)}>
           <ConfirmDeleteDialog
