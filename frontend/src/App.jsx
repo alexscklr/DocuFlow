@@ -41,11 +41,10 @@ function App() {
         {/*<ThemeSwitch />*/}
         <Header />
         <Routes>
-          <Route path="/" element={<Main />} />
+          <Route path="/" element={<OrganizationsPage />} />
           <Route path="/access" element={<AccessPage />} />
           <Route path="/testing" element={<BackendTesting />} />
           <Route path="/invite" element={<AcceptInvitation />} />
-          <Route path="/organizations" element={<OrganizationsPage />} />
           <Route path="/members" element={<MembersPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/profile/:profileId" element={<ProfilePage />} />

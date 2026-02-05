@@ -11,11 +11,11 @@ export default function Header() {
         <header className="w-full border-b border-white/20">
             <div className="h-[80px] flex items-center justify-between px-[20px]">
                 <button
-                    onClick={() => navigate('/organizations')}
+                    onClick={() => navigate('/')}
                     className="text-[3.5rem] text-left font-semibold hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-0 p-0 leading-none"
                     style={{ fontSize: '3.5rem' }}
                 >
-                    DokuFlow
+                    DocuFlow
                 </button>
 
                 <div className="ml-auto">
