@@ -4,6 +4,20 @@ Ein moderner, modular aufgebauter Dokumenten- und Organisations-Workflow Client 
 
 ## Schnellstart
 
+### Backend (Supabase)
+
+Stelle sicher, dass Docker Desktop läuft.
+
+```powershell
+# Supabase CLI benötigt (falls nicht installiert)
+npm install -g supabase 
+
+cd backend
+supabase start
+```
+
+### Frontend
+
 ```powershell
 cd frontend
 npm install
@@ -11,11 +25,16 @@ npm run dev
 ```
 
 Standardmäßig läuft Vite auf `http://localhost:5173`.
+Standardmäßig läuft Supabase API auf `http://localhost:54321`.
+Das Supabase Studio ist unter `http://localhost:54323` erreichbar.
 
 ### Voraussetzungen
 - Node.js (>= 18 empfohlen)
-- Supabase Projekt (URL & Anon Key)
-- Optional: .env / .env.local für Schlüssel
+- Docker Desktop
+- Supabase CLI (`npm install -g supabase`)
+- Optional: .env / .env.local für API-Keys.
+
+Hinweis: Die Supabase CLI benötigt Docker. Stelle sicher, dass Docker Desktop gestartet ist, bevor du `supabase start` ausführst.
 
 Erstelle in `frontend/` eine `.env` Datei (falls noch nicht vorhanden):
 ```
@@ -25,6 +44,10 @@ VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 
 ## Projektstruktur (Auszug)
 ```
+backend/
+	supabase/
+		config.toml
+		migrations/
 frontend/
 	public/
 	src/
