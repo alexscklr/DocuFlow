@@ -12,107 +12,116 @@ export default function ProjectPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
 
-  const { hasPermission } = useAppData();
-
+  /* =======================
+     Project state
+  ======================= */
   const [project, setProject] = useState(null);
-
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [membersOpen, setMembersOpen] = useState(false);
   const { getProjectById, deleteProject, updateProject } = useProjects(null);
 
   useEffect(() => {
     async function load() {
       const { data, error } = await getProjectById(projectId);
-      if (!error) setProject(data);
+      if (!error && data) setProject(data);
     }
     load();
   }, [projectId, getProjectById]);
 
+  /* =======================
+     Permissions (LOCAL HACK)
+  ======================= */
+  const { hasPermission: ctxHasPermission } = useAppData();
+  const [localPermissions, setLocalPermissions] = useState(null);
+
+  useEffect(() => {
+    async function loadPermissions() {
+      const { data } = await getPermissionsOfUser();
+      if (data) setLocalPermissions(data);
+    }
+    loadPermissions();
+  }, [projectId]);
+
+  const hasPermission = (id, scope, permission) => {
+    if (!id) return false;
+    if (localPermissions) {
+      return checkPermission(localPermissions, id, scope, permission);
+    }
+    return ctxHasPermission(id, scope, permission);
+  };
+
+  /* =======================
+     Documents
+  ======================= */
   const { documents, addDocument, loadDocuments } = useDocuments(projectId);
-  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
   const { statuses, loadStatuses } = useDocumentStatuses(projectId);
-  
-  // Load statuses when projectId is available
-  useEffect(() => {
-    if (projectId) {
-      loadStatuses();
-    }
-  }, [projectId, loadStatuses]);
-  
-  // Load versions for all documents to get version numbers
-  const [documentVersionsMap, setDocumentVersionsMap] = useState({});
-  
-  useEffect(() => {
-    const loadAllVersions = async () => {
-      const versionsMap = {};
-      for (const doc of documents) {
-        if (doc.id) {
-          const { getDocumentVersions } = await import('@/shared/lib/documentVersionsQueries');
-          const { data } = await getDocumentVersions(doc.id);
-          if (data && data.length > 0) {
-            versionsMap[doc.id] = data[0]; // Latest version
-          }
-        }
-      }
-      setDocumentVersionsMap(versionsMap);
-    };
-    
-    if (documents.length > 0) {
-      loadAllVersions();
-    }
-  }, [documents]);
 
   const handleLoadDocuments = useCallback(async () => {
-    setIsLoadingDocuments(true);
     try {
       await loadDocuments();
     } catch (error) {
       console.error('Error loading documents:', error);
-    } finally {
-      setIsLoadingDocuments(false);
     }
   }, [loadDocuments]);
 
   useEffect(() => {
-    handleLoadDocuments();
-  }, []);
+    if (projectId) {
+      handleLoadDocuments();
+      loadStatuses();
+    }
+  }, [projectId, handleLoadDocuments, loadStatuses]);
 
-  // Format documents for Table component
-  const formattedDocuments = documents.map((doc) => {
-    // Get status with name and color
-    const status = doc.status_id ? statuses.find(s => s.id === doc.status_id) : null;
-    const state = status ? status.name : 'Draft';
-    const stateColor = status?.color || '#3b82f6'; // Default blue if no color
-    
-    // Get version number from latest version
-    const latestVersion = documentVersionsMap[doc.id];
-    const version = latestVersion ? `v${latestVersion.version_number}` : 'No version';
-    
-    // Format date
-    const date = doc.created_at ? new Date(doc.created_at).toLocaleDateString() : 'N/A';
-    
-    return {
-      ...doc,
-      title: doc.title || 'Untitled Document',
-      state,
-      stateColor,
-      version,
-      date,
+  /* =========================
+     Versions (latest per doc)
+  ========================= */
+  const [documentVersionsMap, setDocumentVersionsMap] = useState({});
+
+  useEffect(() => {
+    const loadVersions = async () => {
+      const versionsMap = {};
+
+      for (const doc of documents) {
+        if (!doc.id) continue;
+
+        const { getDocumentVersions } = await import(
+          '@/shared/lib/documentVersionsQueries'
+        );
+
+        const { data } = await getDocumentVersions(doc.id);
+        if (data && data.length > 0) {
+          versionsMap[doc.id] = data[0]; // latest
+        }
+      }
+
+      setDocumentVersionsMap(versionsMap);
     };
-  });
 
+    if (documents.length > 0) {
+      loadVersions();
+    }
+  }, [documents]);
 
+  /* =======================
+     UI state
+  ======================= */
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(false);
+
+  /* =======================
+     EARLY RETURN (CRITICAL)
+  ======================= */
   if (!project) {
     return (
       <div className="px-8 py-20">
-        <p>Project not found</p>
+        <p>Loading project…</p>
         <button onClick={() => navigate(-1)}>← Back</button>
       </div>
     );
   }
 
+  /* =======================
+     Permissions (SAFE)
+  ======================= */
   const permissions = {
     read: hasPermission(project.id, 'project', 'read'),
     edit: hasPermission(project.id, 'project', 'edit'),
@@ -124,6 +133,45 @@ export default function ProjectPage() {
       hasPermission(project.id, 'project', 'invite_member') ||
       hasPermission(project.id, 'project', 'manage_roles'),
   };
+   const formattedDocuments = documents.map((doc) => {
+    const status = doc.status_id
+      ? statuses.find((s) => s.id === doc.status_id)
+      : null;
+
+    const state = status ? status.name : 'Draft';
+    const stateColor = status?.color || '#3b82f6';
+
+    const latestVersion = documentVersionsMap[doc.id];
+    const version = latestVersion
+      ? `v${latestVersion.version_number}`
+      : 'No version';
+
+    const date = doc.created_at
+      ? new Date(doc.created_at).toLocaleDateString()
+      : 'N/A';
+
+    return {
+      ...doc,
+      title: doc.title || 'Untitled Document',
+      state,
+      stateColor,
+      version,
+      date,
+    };
+  });
+
+  /* =========================
+     EARLY RETURN (JS ONLY)
+  ========================= */
+  if (!project) {
+    return (
+      <div className="px-8 py-20">
+        <p>Loading project…</p>
+        <button onClick={() => navigate(-1)}>← Back</button>
+      </div>
+    );
+  }
+
 
   return (
     <div className="h-screen text-[var(--color-text)]">

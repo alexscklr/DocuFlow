@@ -34,7 +34,7 @@ export default function ProjectsPage() {
     return (
       <div className="px-8 py-20">
         <p>Organization not found</p>
-        <button onClick={() => navigate('/organizations')}>
+        <button onClick={() => navigate('/')}>
           ← Back
         </button>
       </div>
@@ -119,7 +119,7 @@ export default function ProjectsPage() {
             onCancel={() => setDeleteOrgOpen(false)}
             onConfirm={async () => {
               await deleteOrganization(org.id);
-              navigate('/organizations');
+              navigate('/');
             }}
           />
         </Modal>
