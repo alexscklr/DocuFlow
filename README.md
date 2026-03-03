@@ -14,6 +14,7 @@ npm install -g supabase
 
 cd backend
 supabase start
+node seed-storage.js avatars
 ```
 
 ### Frontend
@@ -171,8 +172,4 @@ function OrgProjects({ organization }) {
 - Policy Recursion (42P17): Prüfen, ob Policy eine Tabelle indirekt erneut abfragt.
 
 ## Lizenz / Hinweise
-Derzeit keine Lizenzangabe im Repository. Bei öffentlicher Veröffentlichung Lizenz ergänzen (z.B. MIT).
-
----
-Bei Fragen oder gewünschter Erweiterung (z.B. ChangeEmail UI, Permissions, Query Layer) einfach melden.
-
+MIT Lizenz.

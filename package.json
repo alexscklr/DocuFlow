@@ -1,0 +1,25 @@
+{
+  "name": "docuflow",
+  "version": "1.0.0",
+  "description": "Ein moderner, modular aufgebauter Dokumenten- und Organisations-Workflow Client (React + Vite + Supabase) mit Theme-Variablen, schlanker Global-State-Struktur und erweiterbaren Feature Hooks.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexscklr/DocuFlow.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/alexscklr/DocuFlow/issues"
+  },
+  "homepage": "https://github.com/alexscklr/DocuFlow#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.98.0",
+    "dotenv": "^17.3.1"
+  }
+}
